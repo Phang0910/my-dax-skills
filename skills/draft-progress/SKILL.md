@@ -37,6 +37,10 @@ user says they have deployed or checked in, take them at their word.
 
 House format. **Short is the whole point** — aim for 5–8 lines, hard ceiling ~12.
 
+That ceiling applies to reporting *what was done*. A note whose job is to explain *why something
+behaves the way it does* may run longer — clarity wins over the line count. Cut restatement and
+jargon, never the worked figures.
+
 ```
 #<id> — <one-line status>.
 
@@ -64,6 +68,74 @@ Requested date needed no change — standard D365FO already blocks backdating th
 
 Ready for user testing.
 ```
+
+### Variant — analysis done, decision needed
+
+Not every note reports a finished fix. When the outcome is a root cause plus a question for the
+user, keep the same shape but swap the middle: explanation, then one paragraph putting the choice
+to the user with a recommendation, then `Held pending user confirmation.`
+
+```
+#19169 — Root cause confirmed. Awaiting user decision before development.
+
+Report as Finished is standard D365. The block comes from a Luvata validation on the
+custom Gross weight field: "Gross weight cannot be lower than Good quantity."
+
+For a production posting, this is correct:
+gross weight (1,031.50) vs good qty (1,001.50) -> passes
+
+The actual issue — a reversal posts the same figures as negatives, so the same rule
+blocks it:
+gross weight (-1,031.50) vs good qty (-1,001.50) -> rejected
+
+-1,031.50 is the lower number, so the rule rejects it even though the figures are correct.
+
+To confirm with the user: the existing rule works for a production posting only. For a
+reversal, should we apply the opposite rule ("gross weight cannot be higher than good
+quantity"), or should we simply skip the validation? We recommend the opposite rule, so
+a reversal also cannot be keyed with a mismatched weight.
+
+Also noted, on a reversal:
+- Tare weight is forced to 0.00 instead of the expected negative value.
+- Actual PCS has no validation, so it must be keyed as negative manually.
+
+Held pending user confirmation.
+```
+
+Always give a recommendation alongside the question. "Which do you want?" with no steer pushes the
+decision back unhelpfully.
+
+### Writing the explanation
+
+When the note has to make a reader *understand* something — not just tell them it is done — these
+matter more than brevity. An explanation that has to be re-read twice is not short, it is expensive.
+
+- **Show the figures, do not describe the rule.** Real numbers in a comparison line beat any prose
+  restatement. Use `label (value) vs label (value) -> outcome`, one case per line, working case
+  first. The reader sees the break themselves instead of being told about it.
+- **Quote the message, never paraphrase it.** Write `the validation: "Gross weight cannot be lower
+  than Good quantity."` — not `a rule saying gross weight must be the higher figure`. The paraphrase
+  is a second thing for the reader to reconcile against the message they actually saw on screen.
+- **One term per concept, used every time.** Pick `reversal` or `negative case` and never drift
+  between them mid-note; same for its opposite (`production posting`). Only pair them as
+  `reversal/negative` when the reader genuinely needs both senses at once.
+- **Never reference a concept before you introduce it.** The killer is a phrase like "the rule was
+  only written for X, not Y" placed *before* the reader knows a second rule is even on the table —
+  "the rule" then reads as the existing one, and they wonder why Y ever needed it. Move that
+  sentence next to the thing it is setting up.
+- **Label the real problem, so a later question cannot displace it.** When a note carries both a
+  defect *and* an open question about the fix, tag the defect line — `The actual issue — <what
+  breaks>:`. Without it, readers finish on the question ("do we need a rule for reversals?") and
+  walk away thinking that is the ticket, forgetting the real point: an existing rule written for
+  one case is misfiring in another. The paragraph a reader meets last is the one they remember, so
+  the earlier one has to be marked.
+  Say `the actual issue`, not `the bottleneck` (jargon, and nothing is slow) and never `the request
+  from user` — that reframes our own defect as a change they asked for, and invites "is this
+  chargeable?".
+- **State plainly when the user did nothing wrong.** "The figures the user keyed are correct" heads
+  off a whole round of the customer re-checking their own data entry.
+- **Several side notes → one `-` line each under a shared lead-in.** A single side note stays inline
+  as prose. Do not bullet one item.
 
 ### Rules
 
