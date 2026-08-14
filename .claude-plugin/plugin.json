@@ -1,0 +1,20 @@
+{
+  "name": "my-dax-skills",
+  "version": "0.1.0",
+  "description": "Personal D365FO workflow skills — Tracker progress notes and related day-to-day helpers.",
+  "author": {
+    "name": "Jun Phang Gan",
+    "email": "jp.gan@daxonet.com"
+  },
+  "homepage": "https://github.com/Phang0910/my-dax-skills",
+  "repository": "https://github.com/Phang0910/my-dax-skills",
+  "license": "MIT",
+  "keywords": [
+    "d365fo",
+    "dynamics-365",
+    "tracker",
+    "redmine",
+    "productivity"
+  ],
+  "category": "productivity"
+}

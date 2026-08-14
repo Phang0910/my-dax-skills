@@ -1,0 +1,21 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "my-dax-skills",
+  "description": "Personal Claude Code skills for D365FO / Dynamics work",
+  "owner": {
+    "name": "Jun Phang Gan",
+    "email": "jp.gan@daxonet.com"
+  },
+  "plugins": [
+    {
+      "name": "my-dax-skills",
+      "description": "Personal D365FO workflow skills — Tracker progress notes and related day-to-day helpers.",
+      "author": {
+        "name": "Jun Phang Gan"
+      },
+      "category": "productivity",
+      "source": "./",
+      "homepage": "https://github.com/Phang0910/my-dax-skills"
+    }
+  ]
+}
