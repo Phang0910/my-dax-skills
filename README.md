@@ -23,6 +23,7 @@ Then restart Claude Code. Skills are invoked namespaced by the plugin:
 | Skill | What it does |
 |---|---|
 | `draft-progress` | Drafts a short progress/completion note for a Tracker (Redmine) ticket in the house format, shows it with the ticket number for confirmation, then posts it to the ticket. |
+| `draft-email` | Drafts a reply email to a customer or vendor in the house style, then hands it back for you to review and send yourself. |
 
 ### draft-progress
 
@@ -35,6 +36,22 @@ reads the ticket back to show you its subject, and **always** asks before postin
 reaches the Tracker until you confirm.
 
 Requires the Tracker MCP server to be connected.
+
+### draft-email
+
+Writes a reply in the way the team actually writes to customers — short, plain labels
+(`What is needed:`, `Steps:`, `To confirm:`), menu paths as `A > B > C`, closing on
+`Do let me know if you have any further questions.`
+
+It reads the existing thread off the Tracker ticket first, so it picks up the real recipient
+list and the exact subject line — including the `[#id]` prefix that files the reply back into
+Tracker. It answers every question the other side asked, and adds a verification step so the
+thread does not bounce back unverified.
+
+**It never sends.** The draft comes back in chat for you to review. It can save an Outlook draft
+if you ask, but sending is always yours.
+
+Tracker MCP for reading the thread; Microsoft 365 MCP only if you want the Outlook draft.
 
 ## Adding a skill
 
