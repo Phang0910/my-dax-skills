@@ -64,4 +64,17 @@ description: <when Claude should use this skill>
 ---
 ```
 
-Commit and push, then `/plugin marketplace update my-dax-skills` on each machine.
+Then **bump `version` in `.claude-plugin/plugin.json`** — this step is not optional. The plugin
+cache is keyed by version (`~/.claude/plugins/cache/my-dax-skills/my-dax-skills/<version>/`), so
+if the version is unchanged, `marketplace update` refreshes the marketplace metadata but never
+re-extracts the plugin. The new skill is pushed, present in the repo, and still invisible in
+Claude Code.
+
+Commit and push, then on each machine:
+
+```
+/plugin marketplace update my-dax-skills
+```
+
+and restart Claude Code. To confirm it landed, check that a directory for the new version exists
+under the cache path above and contains your skill.
