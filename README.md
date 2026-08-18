@@ -24,6 +24,8 @@ Then restart Claude Code. Skills are invoked namespaced by the plugin:
 |---|---|
 | `draft-progress` | Drafts a short progress/completion note for a Tracker (Redmine) ticket in the house format, shows it with the ticket number for confirmation, then posts it to the ticket. |
 | `draft-email` | Drafts a reply email to a customer or vendor in the house style, then hands it back for you to review and send yourself. |
+| `weekly-report` | Drafts this week's Customer Success Weekly Report in DAXONET Notes, pulled from the Tracker. |
+| `update-weekly-report` | Refreshes an existing weekly report doc — re-pulls the week, folds in what landed since, tightens the prose. |
 
 ### draft-progress
 
@@ -52,6 +54,19 @@ thread does not bounce back unverified.
 if you ask, but sending is always yours.
 
 Tracker MCP for reading the thread; Microsoft 365 MCP only if you want the Outlook draft.
+
+### weekly-report
+
+Pulls the week off the Tracker and writes the Customer Success Weekly Report into DAXONET Notes
+in the house format.
+
+### update-weekly-report
+
+Refreshes a weekly report that already exists. It rewrites and curates the whole report rather
+than appending bullets to the bottom — re-pulls the week, folds in what landed since, and tightens
+what is already there.
+
+Both are `disable-model-invocation`, so they only run when you invoke them by name.
 
 ## Adding a skill
 
