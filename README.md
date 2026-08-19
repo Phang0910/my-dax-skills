@@ -24,6 +24,7 @@ Then restart Claude Code. Skills are invoked namespaced by the plugin:
 |---|---|
 | `draft-progress` | Drafts a short progress/completion note for a Tracker (Redmine) ticket in the house format, shows it with the ticket number for confirmation, then posts it to the ticket. |
 | `draft-email` | Drafts a reply email to a customer or vendor in the house style, then hands it back for you to review and send yourself. |
+| `draft-closing-email` | Drafts the final ticket-closure email for a resolved support case, in the DAXONET closure format, with the consultant hours taken from Tracker rather than the template. |
 | `weekly-report` | Drafts this week's Customer Success Weekly Report in DAXONET Notes, pulled from the Tracker. |
 | `update-weekly-report` | Refreshes an existing weekly report doc — re-pulls the week, folds in what landed since, tightens the prose. |
 
@@ -54,6 +55,26 @@ thread does not bounce back unverified.
 if you ask, but sending is always yours.
 
 Tracker MCP for reading the thread; Microsoft 365 MCP only if you want the Outlook draft.
+
+### draft-closing-email
+
+Writes the final closure email for a resolved case, in the format actually in use: the detail
+block (`Support Case ID`, `Reported By`, `Consultant Assigned`, `Summary of Resolution`,
+`Consultant Hours`) as one compact run with no blank lines, first names only, signed off
+`Best Regards, Jun Phang`.
+
+Two things it does that save a round trip. It reads `spent_hours` off the Tracker ticket instead
+of trusting the placeholder figure that circulating copies of the template carry, and it keeps
+the Summary of Resolution to one plain-language sentence — no class names, environments or
+deployment detail.
+
+It also reads the last few journals before drafting and flags when closure looks premature — a
+data fix not yet run, a deployment still unscheduled, or a customer question that was only
+answered on a call. It still shows you the draft; it just tells you what it noticed.
+
+**It never sends.**
+
+Requires the Tracker MCP server.
 
 ### weekly-report
 
