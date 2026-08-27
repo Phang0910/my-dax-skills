@@ -1,6 +1,7 @@
 ---
 name: weekly-report
 description: Draft this week's Customer Success Weekly Report in DAXONET Notes from the Tracker.
+argument-hint: "[Friday's date of the week, e.g. 28 August 2026]"
 disable-model-invocation: true
 ---
 

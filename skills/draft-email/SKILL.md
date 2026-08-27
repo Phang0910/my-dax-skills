@@ -1,6 +1,7 @@
 ---
 name: draft-email
 description: Draft a reply email to a customer or vendor in the DAXONET house style, then hand it back for review. Use when the user asks to write, draft, or reply to an email — to a customer, to NTT/vendor contacts, or on a Tracker email thread.
+argument-hint: "[ticket no]"
 ---
 
 # draft-email

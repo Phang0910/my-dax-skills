@@ -1,6 +1,7 @@
 ---
 name: draft-acknowledge-email
 description: Draft the first-response acknowledgement email for a newly registered DAXONET support case, confirming the Support Case ID and assigned consultant. Use when the user asks to acknowledge a case, draft an acknowledgement/first-response email, or reply that a request has been registered.
+argument-hint: "[ticket no]"
 ---
 
 # draft-acknowledge-email

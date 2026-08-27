@@ -26,6 +26,7 @@ Then restart Claude Code. Skills are invoked namespaced by the plugin:
 | `draft-email` | Drafts a reply email to a customer or vendor in the house style, then hands it back for you to review and send yourself. |
 | `draft-acknowledge-email` | Drafts the first-response acknowledgement email for a newly registered support case — confirms the Support Case ID and the assigned consultant, both read off Tracker. |
 | `draft-closing-email` | Drafts the final ticket-closure email for a resolved support case, in the DAXONET closure format, with the consultant hours taken from Tracker rather than the template. |
+| `draft-follow-up-email` | Drafts the chaser email on a case the customer has gone quiet on — picks the 1st/2nd follow-up, the 3rd that warns of closure, or the system-behaviour archive request, recommending the stage from the ticket's journals. |
 | `weekly-report` | Drafts this week's Customer Success Weekly Report in DAXONET Notes, pulled from the Tracker. |
 | `update-weekly-report` | Refreshes an existing weekly report doc — re-pulls the week, folds in what landed since, tightens the prose. |
 
@@ -90,6 +91,24 @@ deployment detail.
 It also reads the last few journals before drafting and flags when closure looks premature — a
 data fix not yet run, a deployment still unscheduled, or a customer question that was only
 answered on a call. It still shows you the draft; it just tells you what it noticed.
+
+**It never sends.**
+
+Requires the Tracker MCP server.
+
+### draft-follow-up-email
+
+Writes the chaser for a case awaiting the customer's reply. Three standing templates: **A** for
+the first follow-up (the next working day after the resolution went out) and the second (three
+business days later), **B** for the third, which adds `otherwise we'll proceed to set this case to
+close`, and **C** for cases whose answer was "this is system behaviour" and which we want
+archived.
+
+It counts the chasers already on the ticket and recommends the stage, so you do not have to read
+back through the journals — you still choose. It also flags when the chaser is the wrong email:
+the customer already replied and is waiting on us, the gap is too short, or we are the ones
+holding an open commitment. After Template B the next step is `draft-closing-email`, not a fourth
+chaser.
 
 **It never sends.**
 

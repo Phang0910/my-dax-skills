@@ -1,6 +1,7 @@
 ---
 name: update-weekly-report
 description: Refresh an existing Customer Success Weekly Report doc from the Tracker — re-pull the week, fold in what landed since, tighten the prose.
+argument-hint: "[Friday's date of the week, e.g. 28 August 2026]"
 disable-model-invocation: true
 ---
 

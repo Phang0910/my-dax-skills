@@ -1,6 +1,7 @@
 ---
 name: draft-progress
 description: Draft a short progress/completion note for a Tracker (Redmine) ticket in the house format, confirm it with the user, then post it to the ticket. Use when the user asks to write up, summarise, or post what they have done to a ticket.
+argument-hint: "[ticket no]"
 ---
 
 # draft-progress

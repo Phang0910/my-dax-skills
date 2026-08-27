@@ -1,6 +1,7 @@
 ---
 name: draft-closing-email
 description: Draft the final ticket-closure email for a resolved Tracker support case, in the DAXONET closure format. Use when the user asks to close a ticket, draft a closing/closure email, or send the final email for a case.
+argument-hint: "[ticket no]"
 ---
 
 # draft-closing-email
