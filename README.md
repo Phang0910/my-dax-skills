@@ -27,6 +27,7 @@ Then restart Claude Code. Skills are invoked namespaced by the plugin:
 | `draft-acknowledge-email` | Drafts the first-response acknowledgement email for a newly registered support case — confirms the Support Case ID and the assigned consultant, both read off Tracker. |
 | `draft-closing-email` | Drafts the final ticket-closure email for a resolved support case, in the DAXONET closure format, with the consultant hours taken from Tracker rather than the template. |
 | `draft-follow-up-email` | Drafts the chaser email on a case the customer has gone quiet on — picks the 1st/2nd follow-up, the 3rd that warns of closure, or the system-behaviour archive request, recommending the stage from the ticket's journals. |
+| `raise-ms-support-ticket` | Guides you through raising a Microsoft support request in the Power Platform admin center — drafts the description block, watches the live browser to stay in step, then writes the Microsoft ticket number into the Tracker ticket's Principal Case # field. |
 | `weekly-report` | Drafts this week's Customer Success Weekly Report in DAXONET Notes, pulled from the Tracker. |
 | `update-weekly-report` | Refreshes an existing weekly report doc — re-pulls the week, folds in what landed since, tightens the prose. |
 
@@ -113,6 +114,34 @@ chaser.
 **It never sends.**
 
 Requires the Tracker MCP server.
+
+### raise-ms-support-ticket
+
+Files a Microsoft support request without you having to hold the whole case in your head in front
+of a form that times out.
+
+It builds one thing up front — the **description block**, in a code block ready to paste: the
+verbatim error, the environment and account IDs, the correlation ID and timestamp Microsoft's FAQ
+insists on, the evidence that rules out a local cause, the Learn link, and numbered questions.
+Everything else is resolved on demand, when the portal actually asks. Attachments are printed as a
+note, never as a gate — the request can be created without them.
+
+It derives the pack from the conversation you are already in plus the Tracker ticket, and leaves
+what it cannot find **blank**. No questionnaire.
+
+Then it guides you through the Power Platform admin center — Support agent pane or the web-form
+fallback — one instruction at a time, reading the live page after each step so a validation error
+does not put the two of you out of sync. It recommends the answers that matter (Power Platform
+Administration, Technical, Severity B, grant diagnostic consent) with the reason each one costs you
+a day if you get it wrong.
+
+**It never signs in and it never clicks Create support request.** You do both. Afterwards it reads
+the ticket number off the confirmation page, shows it to you, and on your confirmation writes it to
+the Tracker ticket's Principal Case # field — resolved by name via `list_custom_fields`, and the
+only field it touches. Then it stops; chasing Microsoft's reply is the email skills' job.
+
+Always PPAC, never Lifecycle Services. Needs the Tracker MCP and the `claude-in-chrome` extension —
+though with no browser it still gives you a description block you can file by hand.
 
 ### weekly-report
 
