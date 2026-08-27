@@ -59,7 +59,7 @@ Do let me know if you have any further questions.
 
 Thank you.
 
-Regards,
+Best Regards,
 <Sender name>
 ```
 
