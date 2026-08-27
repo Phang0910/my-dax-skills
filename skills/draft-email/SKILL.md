@@ -61,7 +61,6 @@ Thank you.
 
 Regards,
 <Sender name>
-DAXONET Customer Success
 ```
 
 **Salutation** — match what the thread already uses:
