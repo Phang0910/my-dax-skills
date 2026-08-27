@@ -53,7 +53,7 @@ If you need further help or have any questions, just let us know. We're here to 
 Thank you.
 
 Best Regards,
-Jun Phang
+<sender name>
 ```
 
 Details that matter:
@@ -62,7 +62,7 @@ Details that matter:
   not `Gan Jun Phang`.
 - **`Consultant Hours`** — plural, even at 1.0.
 - **Salutation** — `Dear <Name>,` on MMM threads. Match whatever the thread already uses.
-- **Sign off `Best Regards,` then `Jun Phang`.** Do not add the `DAXONET Customer Success` line
+- **Sign off `Best Regards,` then `<sender name>`.** Do not add the `DAXONET Customer Success` line
   or the hotline block here — the mail client signature supplies them.
 - The `Please confirm the closure…` paragraph is part of the standard template. Some past
   closures omitted it; include it unless the user says otherwise.
