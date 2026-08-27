@@ -27,7 +27,7 @@ Then restart Claude Code. Skills are invoked namespaced by the plugin:
 | `draft-acknowledge-email` | Drafts the first-response acknowledgement email for a newly registered support case — confirms the Support Case ID and the assigned consultant, both read off Tracker. |
 | `draft-closing-email` | Drafts the final ticket-closure email for a resolved support case, in the DAXONET closure format, with the consultant hours taken from Tracker rather than the template. |
 | `draft-follow-up-email` | Drafts the chaser email on a case the customer has gone quiet on — picks the 1st/2nd follow-up, the 3rd that warns of closure, or the system-behaviour archive request, recommending the stage from the ticket's journals. |
-| `raise-ms-support-ticket` | Guides you through raising a Microsoft support request in the Power Platform admin center — drafts the description block, watches the live browser to stay in step, then writes the Microsoft ticket number into the Tracker ticket's Principal Case # field. |
+| `raise-ms-support-ticket` | Guides you through raising a Microsoft support request in the Power Platform admin center, one short step at a time — reads the live browser, or your screenshots if the Chrome extension is not connected, then writes the Microsoft ticket number into the Tracker ticket's Principal Case # field. |
 | `close-ticket` | Closes a resolved Tracker ticket — sets the status, picks the Root Cause from the dropdown, writes the Resolution in the internal house style, and stamps today as the Resolution Date. The natural next step after `draft-closing-email`. |
 | `weekly-report` | Drafts this week's Customer Success Weekly Report in DAXONET Notes, pulled from the Tracker. |
 | `update-weekly-report` | Refreshes an existing weekly report doc — re-pulls the week, folds in what landed since, tightens the prose. |
@@ -121,20 +121,23 @@ Requires the Tracker MCP server.
 Files a Microsoft support request without you having to hold the whole case in your head in front
 of a form that times out.
 
-It builds one thing up front — the **description block**, in a code block ready to paste: the
-verbatim error, the environment and account IDs, the correlation ID and timestamp Microsoft's FAQ
-insists on, the evidence that rules out a local cause, the Learn link, and numbered questions.
-Everything else is resolved on demand, when the portal actually asks. Attachments are printed as a
-note, never as a gate — the request can be created without them.
+**It starts at the browser.** No evidence pack, no case summary, no wall of text before anything
+happens — you already know the case you are filing. Every piece of text is produced at the moment
+the portal asks for it, including the description block, which arrives as a code block ready to
+paste when the field appears.
 
-It derives the pack from the conversation you are already in plus the Tracker ticket, and leaves
-what it cannot find **blank**. No questionnaire.
+Each step is one screenful: what to click, at most one line of why, and the text to paste. It
+recommends the answers that matter — Power Platform Administration, Technical, Severity B, grant
+diagnostic consent — with the reason in a clause rather than a paragraph.
 
-Then it guides you through the Power Platform admin center — Support agent pane or the web-form
-fallback — one instruction at a time, reading the live page after each step so a validation error
-does not put the two of you out of sync. It recommends the answers that matter (Power Platform
-Administration, Technical, Severity B, grant diagnostic consent) with the reason each one costs you
-a day if you get it wrong.
+It guides you through the Power Platform admin center — Support agent pane or the web-form
+fallback — reading the live page after each step so a validation error does not put the two of you
+out of sync. If the **Claude in Chrome** extension is not connected it says so, gives you the
+install link, and runs the identical flow on **one screenshot per step** instead. It never asks
+you to describe what happened in words; a screenshot is the page, your description is not.
+
+Material comes from the conversation you are already in plus the Tracker ticket, and anything it
+cannot find is left **blank**. No questionnaire.
 
 **It never signs in and it never clicks Create support request.** You do both. Afterwards it reads
 the ticket number off the confirmation page, shows it to you, and on your confirmation writes it to
