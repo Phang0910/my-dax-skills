@@ -49,6 +49,8 @@ Assigned Consultant: <first name>
 
 Please use the Case ID for any future communication. Our support consultant is now on the case and will assist you promptly.
 
+Thank you.
+
 Best Regards,
 <sender name>
 ```
