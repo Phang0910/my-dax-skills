@@ -50,14 +50,14 @@ Assigned Consultant: <first name>
 Please use the Case ID for any future communication. Our support consultant is now on the case and will assist you promptly.
 
 Best Regards,
-Jun Phang
+<sender name>
 ```
 
 Details that matter:
 
 - **First names only.** `Assigned Consultant: Jun Phang`, not `Gan Jun Phang`.
 - **Salutation** — `Dear <Name>,` on MMM threads. Match whatever the thread already uses.
-- **Sign off `Best Regards,` then `Jun Phang`.** Do not add the `DAXONET Customer Success`
+- **Sign off `Best Regards,` then `<sender name>`.** Do not add the `DAXONET Customer Success`
   line or the hotline block — the mail client signature supplies them.
 - **Nothing else goes in.** No summary of the issue, no ETA, no first-look findings, no
   troubleshooting questions. This email says *we have it and here is the reference*. Substance
