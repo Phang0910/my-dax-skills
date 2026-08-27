@@ -107,3 +107,15 @@ can be checked at a glance. Then list the flags from Step 4 and any value you su
 (hours especially).
 
 Treat any change request as a redraft and show the whole email again, not a diff.
+
+## Step 6 — Point at `close-ticket`
+
+The email is only half of closing a case; the Tracker record still needs its status, Root Cause,
+Resolution and Resolution Date. Once the draft is settled, say so in one line:
+
+> Once this has gone out, `/my-dax-skills:close-ticket` will close #<id> in Tracker — I'd suggest
+> Root Cause `<value>`, and the Summary of Resolution above carries straight into the Resolution
+> field.
+
+One line, as an offer. Do not start closing the ticket yourself, and do not push it if the user is
+waiting on the customer to confirm closure first.

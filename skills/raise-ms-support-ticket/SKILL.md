@@ -158,17 +158,31 @@ exists and both must be handled.
 
 Fit these to the case in front of you — but always give the reason, not just the value.
 
-## Step N+1 — Capture the ticket number
+## Step N+1 — Capture the Microsoft ticket number
 
-Read it off the confirmation page. Show it to the user and have them **confirm it is correct**
-before anything is written to Tracker.
+Read it off the confirmation page — a 16-digit case number, e.g. `2608020030001071`. Show it to
+the user and have them **confirm it is correct** before anything is written to Tracker.
 
-## Step N+2 — Write it back to Tracker
+## Step N+2 — Write it into Principal Case #
 
-1. `mcp__claude_ai_Tracker__list_custom_fields` to resolve the **Principal Case #** field id.
-   **Never guess it and never reuse a remembered id.** On #19119, `cf 51` is *Customer Work Item* —
-   the Azure DevOps work item, not this field.
-2. Show the user the resolved field name and the value about to be written.
+**Principal Case # holds the Microsoft support ticket ID, and it is filled as soon as the support
+request exists** — not when Microsoft first replies, and not at closure. It is what links the
+Tracker case to Microsoft's, so anyone picking the ticket up can find the Microsoft thread.
+
+Do this in the same session, immediately after Step N+1. If the write cannot be made — the field
+rejects the value, the ticket id is wrong — say so plainly rather than leaving the user thinking
+the link was recorded.
+
+1. **Principal Case # is `cf 43`.** Do not call `list_custom_fields` to confirm it — that endpoint
+   requires admin and errors on this account. `cf 43` is verified against #18932, where the
+   Microsoft case number `2608020030001071` was written to it when the ticket moved to
+   *In Progress: Customer*.
+
+   Take care not to reach for a neighbouring field: on #19119, `cf 51` is *Customer Work Item* —
+   the Azure DevOps work item — and `cf 52` / `cf 53` are Resolution and Resolution Date, which
+   belong to `close-ticket`. If you want to sanity-check before writing, `get_issue` on a ticket
+   that already went to Microsoft and confirm `cf 43` holds a 16-digit case number.
+2. Show the user the field and the value about to be written.
 3. On confirmation, `update_issue` setting **only** that custom field. Do not touch `status_id`,
    `assigned_to_id`, `done_ratio`, or anything else.
 
