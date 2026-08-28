@@ -1,37 +1,55 @@
 ---
 name: weekly-report
 description: Draft this week's Customer Success Weekly Report in DAXONET Notes from the Tracker.
-argument-hint: "[Friday's date of the week, e.g. 28 August 2026]"
+argument-hint: "[your name] [Friday's date of the week, e.g. 28 August 2026]"
 disable-model-invocation: true
 ---
 
-Create a new doc under **Customer Success Weekly Report / Jun Phang** and write Gan Jun Phang's weekly report into it, sourced from the Tracker.
+Create a new doc under **Customer Success Weekly Report / \<person\>** and write that person's weekly report into it, sourced from the Tracker.
+
+## Roster
+
+Everything person-specific lives here. Sibling skill `update-weekly-report` reads this table too — keep it the only copy.
+
+| Say | Report by | Tracker id | Tracker display name | Notes folder id |
+|---|---|---|---|---|
+| `junphang`, `jp`, `jun`, `gan` | Gan Jun Phang | 194 | Jun Phang Gan | `5ba25e9d-ee37-47ee-bab0-d0b5336908ca` |
+| `qianying`, `qy`, `chin` | Chin Qianying | 190 | Qianying Chin | `5df1ddcf-0f77-4dae-a91a-5260467734b2` |
+| `zhenwei`, `zw`, `wong` | Wong Zhen Wei | 174 | Zhen Wei Wong | `d45ea1bf-20a0-46ba-868c-4147612f6b75` |
+| `khor`, `wk`, `weakee` | Khor Wea Kee | 60 | WK Khor | `58f0f8f1-dcd4-41dc-a8a5-a632963300bb` |
+| `jayshree`, `jay` | Jayshree | 89 | Jayshree A/P Samugam | `91c9b5ed-bfec-4c55-abd8-37d04c7160c9` |
+
+All five folders sit in collection `e2fe74e9-2a93-4a8e-ae9f-901dc54457b2`. Match the argument case-insensitively against the aliases; **Gan Jun Phang is the default** when the argument carries no name. If the name is given but matches nobody, stop and ask rather than guessing.
+
+Khor's own last two reports title as `<d month yyyy> — CS Manager Weekly Report (Khor)` and some of his older ones sit in a nested *Weekly Update* subfolder — for Khor, append that suffix to the title and still create in the folder root.
 
 ## Steps
 
-1. **Fix the week.** The report is titled after the **Friday** of the target week (default: the Friday of the current week; an argument like "last week" or an explicit date overrides). Title format `d month yyyy` — `7 August 2026`, no leading zero, month spelled out. Report Period is Mon–Fri of that week. Done when you have the Friday date and the Mon/Fri boundaries as absolute dates.
+1. **Fix the person and the week.** Resolve the person from the roster. The report is titled after the **Friday** of the target week (default: the Friday of the current week; an argument like "last week" or an explicit date overrides). Title format `d month yyyy` — `7 August 2026`, no leading zero, month spelled out. Report Period is Mon–Fri of that week. Done when you have the roster row, the Friday date and the Mon/Fri boundaries as absolute dates.
 
-2. **Pull the Tracker.** Gan Jun Phang is Tracker user id **194**.
-   - `list_issues` with `assigned_to_id: "me"`, `status_id: "*"`, `sort: "updated_on:desc"` — keep issues touched inside the week.
-   - `list_time_entries` with `user_id: 194`, `from`/`to` = the Mon/Fri dates — this is the load-bearing signal for what was actually worked and for how long.
+2. **Pull the Tracker.** Use the roster's Tracker id — always the number, never `assigned_to_id: "me"`, which silently reports on whoever owns the API token instead of the person asked for.
+   - `list_issues` with `assigned_to_id: "<tracker id>"`, `status_id: "*"`, `sort: "updated_on:desc"` — keep issues touched inside the week.
+   - `list_time_entries` with `user_id: <tracker id>`, `from`/`to` = the Mon/Fri dates — this is the load-bearing signal for what was actually worked and for how long.
    - `get_issue` on each in-week issue for description, journals and attachments.
    Done when every in-week issue and time entry is accounted for, with hours per day totalled.
 
+   For a peer, `list_issues` can under-return — the token only sees projects it is a member of, while their time entries still show. If the issue list looks thin against the logged hours, that is a visibility gap, not a light week: say so instead of writing the week up as quiet.
+
 3. **Ask before inventing.** Where the tracker is too thin to fill a section — no root-cause note, no closure, off-tracker work, unstated next-week goals — ask with `AskUserQuestion` (multiple choice plus notes). Never fabricate accomplishments, and say plainly in the report when a week is light or only partly executed. Done when every remaining gap is either answered or explicitly flagged in the doc.
 
-4. **Create the doc.** `create_document` with `parentDocumentId: "5ba25e9d-ee37-47ee-bab0-d0b5336908ca"` (the *Jun Phang* folder inside collection `e2fe74e9-2a93-4a8e-ae9f-901dc54457b2`), `title` from step 1, and `text` in the layout below. Done when the tool returns a URL.
+4. **Create the doc.** `create_document` with `parentDocumentId` = the roster's folder id, `title` from step 1, and `text` in the layout below. Done when the tool returns a URL.
 
-5. **Report back.** Give the user the doc URL and name anything you flagged, asked about, or left for them to top up.
+5. **Report back.** Give the user the doc URL, name whose report it is, and name anything you flagged, asked about, or left for them to top up.
 
 ## Layout
 
-Follow the team template exactly — peers' reports (Chin Qianying, Wong Zhen Wei, Khor Wea Kee) sit beside yours in the same collection.
+Follow the team template exactly — the five folders sit side by side in the same collection and all use it.
 
 ```
 :::info
 Project: Customer Success Weekly Report
 
-Report by: Gan Jun Phang
+Report by: <roster "Report by" name>
 
 Report date: <Friday, d month yyyy>
 
