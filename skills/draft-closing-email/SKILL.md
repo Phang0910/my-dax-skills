@@ -25,8 +25,16 @@ user's summary alone.** From the ticket, establish:
 
 - **The exact subject line** — reuse it verbatim, including any `[#<id>]` prefix. That prefix
   files the reply back into Tracker; rewriting it breaks threading.
-- **Reported By** — the `author` field.
-- **Consultant Assigned** — the `assigned_to` field, unless the user names someone else.
+- **Reported By** — **the customer, always. Never a DAXONET person.** Do *not* just copy the
+  `author` field: cases are frequently registered in Tracker by DAXONET staff on the customer's
+  behalf, so the author is often one of us. No DAXONET member — consultant, support, PM, whoever
+  keyed the case in — ever belongs on this line; if it's a colleague's name, it's wrong. Take the
+  customer's first name from the thread instead: the `Dear <Name>,` salutation on the
+  acknowledgement and the reply journals is the reliable source. If the author is internal and no
+  customer name appears in the journals, ask the user rather than guessing.
+- **Consultant Assigned** — the `assigned_to` field, unless the user names someone else. This is
+  the one line that *is* a DAXONET name. If the acknowledgement email named a different
+  consultant, flag the mismatch so the closure matches what the customer was told.
 - **Consultant Hours** — the `spent_hours` field. See the warning in Step 3.
 - **Whether the case is actually finished** — read the last few journals. See Step 4.
 - **The Cc list** — keep everyone already on the thread, including the project helpdesk alias
