@@ -4,7 +4,7 @@ description: Draft a progress-update email on an open support case — where we 
 argument-hint: "[ticket no] [describe your progress]"
 ---
 
-# draft-follow-up-email-progress (our own progress)
+# draft-follow-up-email-progress (progress)
 
 Draft the progress update we owe the customer on an open case, show it to the user, and stop.
 **You are drafting, not sending.**
