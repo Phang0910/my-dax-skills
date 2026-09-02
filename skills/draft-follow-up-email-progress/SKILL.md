@@ -72,6 +72,21 @@ questions.` — this template is complete as it stands and is not the `draft-ema
   ball is visibly in their court.
 - **No apology paragraph.** If we slipped a date, one clause covers it, then the new date.
 
+**When the user supplies a screenshot, the screenshot is the evidence — do not retell it.**
+Summarise it in one short sentence saying where things stand, then point the reader at it
+(`Please refer to the attached screenshot.`). No second sentence walking through what the
+screenshot already shows. A screenshot of a vendor's acknowledgement carries more weight with
+the customer than our paraphrase of it, so let it do the work.
+
+- Keep the summary sentence to the state only — assigned, in progress, scheduled, rejected.
+- Read the screenshot before summarising it. If it does not actually show progress, say so to
+  the user rather than dressing it up (Step 4).
+- Still apply the "Leave out" list to the sentence you write. The screenshot may contain direct
+  phone numbers, internal aliases or reference numbers; that is the user's call to attach, but
+  do not copy those details into the body.
+- Remind the user to attach it when handing the draft back — the email no longer stands on its
+  own without it.
+
 **`Target next update:`** defaults to the third working day from the day the email goes out —
 count forward from the send date, skipping weekends and public holidays. But a date the work
 itself dictates wins over the counter: a deployment set for Friday, a vendor ETA the user gave
