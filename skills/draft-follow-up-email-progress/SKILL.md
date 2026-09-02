@@ -1,10 +1,10 @@
 ---
 name: draft-follow-up-email-progress
-description: Draft a progress-update email on an open support case — where we currently are, and when the next update lands. Use when the user wants to update, keep warm, or report progress to a customer on a ticket that is still sitting on our side. For chasing a customer who has gone quiet, use draft-follow-up-email instead.
+description: Draft a progress-update email on an open support case — where we currently are, and when the next update lands. Use when the user wants to update, keep warm, or report progress to a customer on a ticket that is still sitting on our side. For chasing a customer who has gone quiet, use draft-follow-up-email-chaser instead.
 argument-hint: "[ticket no] [describe your progress]"
 ---
 
-# draft-follow-up-email-progress (progress)
+# draft-follow-up-email (progress)
 
 Draft the progress update we owe the customer on an open case, show it to the user, and stop.
 **You are drafting, not sending.**
@@ -12,7 +12,7 @@ Draft the progress update we owe the customer on an open case, show it to the us
 **Never send.** Output the draft in chat. Creating an Outlook *draft* is allowed only if the user
 asks for it explicitly, and even then never `outlook_send_mail` / `outlook_send_draft`.
 
-This is the sibling of `draft-follow-up-email` (chaser). The chaser goes out when **they** have
+This is the sibling of `draft-follow-up-email-chaser`. The chaser goes out when **they** have
 gone quiet. This one goes out when **we** are holding the case and they are waiting on us — a fix
 in progress, a vendor reply pending, a deployment scheduled. Same family, opposite direction.
 
@@ -93,8 +93,8 @@ Say so plainly, in a line or two, if:
   progress note.
 - **We are about to promise a date we already missed once.** Then the email needs one clause on
   what changed, or the new date reads as guesswork.
-- **The case is actually waiting on the customer**, not on us — that is `draft-follow-up-email`
-  (chaser).
+- **The case is actually waiting on the customer**, not on us — that is
+  `draft-follow-up-email-chaser`.
 
 State the concern and still show the finished draft. Do not refuse to draft.
 

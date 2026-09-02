@@ -26,7 +26,7 @@ Then restart Claude Code. Skills are invoked namespaced by the plugin:
 | `draft-email` | Drafts a reply email to a customer or vendor in the house style, then hands it back for you to review and send yourself. |
 | `draft-acknowledge-email` | Drafts the first-response acknowledgement email for a newly registered support case — confirms the Support Case ID and the assigned consultant, both read off Tracker. |
 | `draft-closing-email` | Drafts the final ticket-closure email for a resolved support case, in the DAXONET closure format, with the consultant hours taken from Tracker rather than the template. |
-| `draft-follow-up-email` | Drafts the chaser email on a case the customer has gone quiet on — picks the 1st/2nd follow-up, the 3rd that warns of closure, or the system-behaviour archive request, recommending the stage from the ticket's journals. |
+| `draft-follow-up-email-chaser` | Drafts the chaser email on a case the customer has gone quiet on — picks the 1st/2nd follow-up, the 3rd that warns of closure, or the system-behaviour archive request, recommending the stage from the ticket's journals. |
 | `draft-follow-up-email-progress` | Drafts the progress-update email on a case still sitting on our side — where we are, and when the next update lands. |
 | `raise-ms-support-ticket` | Guides you through raising a Microsoft support request in the Power Platform admin center, one short step at a time — reads the live browser, or your screenshots if the Chrome extension is not connected, then writes the Microsoft ticket number into the Tracker ticket's Principal Case # field. |
 | `close-ticket` | Closes a resolved Tracker ticket — sets the status, picks the Root Cause from the dropdown, writes the Resolution in the internal house style, and stamps today as the Resolution Date. The natural next step after `draft-closing-email`. |
@@ -99,7 +99,7 @@ answered on a call. It still shows you the draft; it just tells you what it noti
 
 Requires the Tracker MCP server.
 
-### draft-follow-up-email
+### draft-follow-up-email-chaser
 
 Writes the chaser for a case awaiting the customer's reply. Three standing templates: **A** for
 the first follow-up (the next working day after the resolution went out) and the second (three
@@ -119,12 +119,12 @@ Requires the Tracker MCP server.
 
 ### draft-follow-up-email-progress
 
-The other half of the follow-up pair. `draft-follow-up-email` chases a customer who has gone
+The other half of the follow-up pair. `draft-follow-up-email-chaser` chases a customer who has gone
 quiet; this one goes out when **we** are the ones holding the case — a fix in UAT, a vendor reply
 pending, a deployment scheduled — and they are waiting on us.
 
-Takes the ticket number and a plain description of what has moved: `/draft-follow-up-email-progress
-19119 fix is built, now in UAT`. One template, no stage counting. The progress line stays to one
+Takes the ticket number and a plain description of what has moved: `/draft-follow-up-email-progress 19119 fix is built,
+now in UAT`. One template, no stage counting. The progress line stays to one
 to three sentences in plain English, and `Target next update:` defaults to the third working day
 from send unless the work itself names a date — a deployment window or a vendor ETA wins over the
 counter.

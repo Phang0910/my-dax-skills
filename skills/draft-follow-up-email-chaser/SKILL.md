@@ -1,5 +1,5 @@
 ---
-name: draft-follow-up-email
+name: draft-follow-up-email-chaser
 description: Draft a chaser email on a support case the customer has gone quiet on — the 1st/2nd follow-up, the 3rd follow-up that warns of closure, or the system-behaviour archive request. Use when the user asks to follow up, chase, or nudge a customer on a ticket with no response. For updating a customer on our own progress, use draft-follow-up-email-progress instead.
 argument-hint: "[ticket no]"
 ---
