@@ -1,10 +1,10 @@
 ---
 name: draft-follow-up-email
-description: Draft a chaser email on a support case the customer has gone quiet on — the 1st/2nd follow-up, the 3rd follow-up that warns of closure, or the system-behaviour archive request. Use when the user asks to follow up, chase, or nudge a customer on a ticket with no response.
+description: Draft a chaser email on a support case the customer has gone quiet on — the 1st/2nd follow-up, the 3rd follow-up that warns of closure, or the system-behaviour archive request. Use when the user asks to follow up, chase, or nudge a customer on a ticket with no response. For updating a customer on our own progress, use draft-follow-up-email-progress instead.
 argument-hint: "[ticket no]"
 ---
 
-# draft-follow-up-email
+# draft-follow-up-email (chaser)
 
 Draft a follow-up (chaser) email on a case awaiting the customer's response, show it to the user,
 and stop. **You are drafting, not sending.**
@@ -12,9 +12,11 @@ and stop. **You are drafting, not sending.**
 **Never send.** Output the draft in chat. Creating an Outlook *draft* is allowed only if the user
 asks for it explicitly, and even then never `outlook_send_mail` / `outlook_send_draft`.
 
-This sits between `draft-email` and `draft-closing-email` in the same family. The house style,
-salutation table, and writing rules in `draft-email` still apply — this skill only fixes the
-follow-up *templates* and the rule for picking between them.
+This sits between `draft-email` and `draft-closing-email` in the same family. Its sibling is
+`draft-follow-up-email-progress` — that one goes out when **we** are holding the case; this one
+when **they** have gone quiet. The house style, salutation table, and writing rules in
+`draft-email` still apply — this skill only fixes the follow-up *templates* and the rule for
+picking between them.
 
 ---
 
@@ -137,7 +139,8 @@ Details that matter:
   the thanks are already in the body.
 - **Nothing else goes in.** No re-explaining the fix, no fresh findings, no new questions. A
   chaser that reopens the technical discussion restarts the thread instead of closing it. If
-  there is genuinely new substance to send, that is `draft-email`, not a follow-up.
+  there is genuinely new substance to send, that is `draft-email`. If the substance is where our
+  own work has got to, that is `draft-follow-up-email-progress`.
 
 ## Step 4 — Flag anything that makes the chaser wrong
 
@@ -147,7 +150,8 @@ Say so plainly, in a line or two, if:
   then reads as if we did not read their message — draft a reply with `draft-email` instead.
 - **The gap is too short** — the resolution went out today, or the last chaser was yesterday.
 - **We owe them something** — an earlier note promised a data fix, a deployment, or a target
-  date that has not landed. Chasing over our own open commitment is the wrong email.
+  date that has not landed. Chasing over our own open commitment is the wrong email — send the
+  update with `draft-follow-up-email-progress` instead.
 - **Template B is up but the case is not actually resolved.** Warning of closure on an
   unfinished case invites a complaint.
 

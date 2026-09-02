@@ -27,6 +27,7 @@ Then restart Claude Code. Skills are invoked namespaced by the plugin:
 | `draft-acknowledge-email` | Drafts the first-response acknowledgement email for a newly registered support case — confirms the Support Case ID and the assigned consultant, both read off Tracker. |
 | `draft-closing-email` | Drafts the final ticket-closure email for a resolved support case, in the DAXONET closure format, with the consultant hours taken from Tracker rather than the template. |
 | `draft-follow-up-email` | Drafts the chaser email on a case the customer has gone quiet on — picks the 1st/2nd follow-up, the 3rd that warns of closure, or the system-behaviour archive request, recommending the stage from the ticket's journals. |
+| `draft-follow-up-email-progress` | Drafts the progress-update email on a case still sitting on our side — where we are, and when the next update lands. |
 | `raise-ms-support-ticket` | Guides you through raising a Microsoft support request in the Power Platform admin center, one short step at a time — reads the live browser, or your screenshots if the Chrome extension is not connected, then writes the Microsoft ticket number into the Tracker ticket's Principal Case # field. |
 | `close-ticket` | Closes a resolved Tracker ticket — sets the status, picks the Root Cause from the dropdown, writes the Resolution in the internal house style, and stamps today as the Resolution Date. The natural next step after `draft-closing-email`. |
 | `weekly-report` | Drafts this week's Customer Success Weekly Report in DAXONET Notes, pulled from the Tracker. |
@@ -111,6 +112,26 @@ back through the journals — you still choose. It also flags when the chaser is
 the customer already replied and is waiting on us, the gap is too short, or we are the ones
 holding an open commitment. After Template B the next step is `draft-closing-email`, not a fourth
 chaser.
+
+**It never sends.**
+
+Requires the Tracker MCP server.
+
+### draft-follow-up-email-progress
+
+The other half of the follow-up pair. `draft-follow-up-email` chases a customer who has gone
+quiet; this one goes out when **we** are the ones holding the case — a fix in UAT, a vendor reply
+pending, a deployment scheduled — and they are waiting on us.
+
+Takes the ticket number and a plain description of what has moved: `/draft-follow-up-email-progress
+19119 fix is built, now in UAT`. One template, no stage counting. The progress line stays to one
+to three sentences in plain English, and `Target next update:` defaults to the third working day
+from send unless the work itself names a date — a deployment window or a vendor ETA wins over the
+counter.
+
+It flags when this is the wrong email: nothing has actually moved, the customer is sitting
+unanswered, the work is finished (that is `draft-closing-email`), or we are about to re-promise a
+date we already missed.
 
 **It never sends.**
 
