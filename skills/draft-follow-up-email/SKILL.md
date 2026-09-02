@@ -74,6 +74,8 @@ Good morning. May we know if there's any update on this case?
 
 Please do not hesitate to contact us if you've any inquiries.
 
+Target next update: <dd Month yyyy> (<Weekday>)
+
 Thank you.
 
 Best Regards,
@@ -88,6 +90,8 @@ Dear <Name>,
 Good morning. May we know if there's any update on this case?
 
 Please let us know if there's anything we can assist you with, otherwise we'll proceed to set this case to close.
+
+Target next update: <dd Month yyyy> (<Weekday>)
 
 Thank you.
 
@@ -114,6 +118,15 @@ Best Regards,
 
 Details that matter:
 
+- **`Target next update:` is the third working day from the day the email goes out.** Count
+  working days forward from the send date, skipping weekends and public holidays: a chaser sent
+  on a Wednesday targets the following Monday. This matches the three-business-day cadence in
+  Step 2 — the date you promise here is the day the next chaser is due.
+- **Format the date as `1 September 2026 (Tuesday)`** — day without a leading zero, month spelled
+  out, four-digit year, then the weekday name in brackets. The weekday is there so the customer
+  can see at a glance how long they have; do not abbreviate it.
+- **Templates A and B carry the target-update line; Template C does not.** C is asking to archive,
+  so there is no next update to promise.
 - **`Good morning.`** is the template wording. Switch it to `Good afternoon.` when the user is
   sending after midday, and drop it entirely if the thread never uses a time greeting.
 - **Salutation** — `Dear <Name>,` on MMM threads; match whatever the thread already uses. `Hi
