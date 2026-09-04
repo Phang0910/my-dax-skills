@@ -7,7 +7,7 @@ disable-model-invocation: true
 
 Update one week's column on one person's sheet in **ES Weekly Update_Customer Success Team.xlsx**. The counts go in the cells; the ticket list goes in an Excel **cell note** attached to each cell.
 
-**Always ask who the sheet is for** — never assume. Default week is the one containing today.
+Defaults: the sheet belonging to **whoever runs the skill**, and the week **containing today**. An argument overrides either.
 
 ## Finding the file
 
@@ -50,17 +50,21 @@ If it still has not appeared:
 
 ## Roster
 
-One sheet per person, in workbook order:
+One sheet per person, in workbook order. The Tracker id is who step 3 pulls issues for.
 
-| Tab | Part | Name in A4 |
-|---|---|---|
-| `Khor` | `sheet1.xml` | **Dimitri Ong** — the tab name and the person disagree |
-| `Jayshree` | `sheet2.xml` | Jayshree |
-| `Zhen Wei` | `sheet3.xml` | Zhen Wei |
-| `Qianying` | `sheet4.xml` | Qianying |
-| `Jun Phang` | `sheet5.xml` | Jun Phang |
+| Tab | Part | Name in A4 | Tracker id |
+|---|---|---|---|
+| `Khor` | `sheet1.xml` | Dimitri Ong | **ask** — see below |
+| `Jayshree` | `sheet2.xml` | Jayshree | 89 |
+| `Zhen Wei` | `sheet3.xml` | Zhen Wei | 174 |
+| `Qianying` | `sheet4.xml` | Qianying | 190 |
+| `Jun Phang` | `sheet5.xml` | Jun Phang | 194 |
 
-Address sheets by **tab name** — that is what officecli paths take. Re-read the table from the file rather than trusting this copy; tabs get renamed.
+Address sheets by **tab name** — that is what officecli paths take. Re-read the tabs and A4 from the file rather than trusting this copy; tabs get renamed and this table goes stale.
+
+**The `Khor` tab is unresolved.** Its A4 reads `Dimitri Ong`, and Tracker holds both as separate people — `WK Khor` is 60, `Dimitri Ong` is 79. One of the two labels is wrong, and picking the wrong id fills a manager's column with someone else's tickets. If that tab is chosen, ask which person it is and use the id they name; never infer it from the tab name or from A4.
+
+This roster is the ES **workbook's**, and it is not the same set as the roster in `../weekly-report/SKILL.md` — that one covers Khor Wea Kee and has no Dimitri. Keep the ids consistent with it where the same person appears in both.
 
 ## Sheet layout
 
@@ -97,7 +101,7 @@ Gan Jun Phang:
 
 ## Steps
 
-0. **Pre-flight.** All four, in order — each has burned a previous run.
+0. **Pre-flight.** Two checks, both of which you fix yourself rather than reporting.
 
    - **Locate the workbook** with the `find` above. If it is missing, run the one-click sync setup from *Finding the file*, then poll until it appears. A copy in `Downloads` does not count as found.
    - **officecli.** Run `officecli --version`. If it is missing, **install it yourself** — do not ask, and do not make the user read instructions:
@@ -105,10 +109,10 @@ Gan Jun Phang:
      irm https://d.officecli.ai/install.ps1 | iex
      ```
      It installs per-user into `%LOCALAPPDATA%\OfficeCLI`, needs no admin rights, and takes a few seconds. Re-check `officecli --version` afterwards; if the shell still cannot see it, call it by full path rather than telling the user to open a new terminal.
-   - **Excel not holding the file.** If a write later fails with *Device or resource busy* / `PermissionError`, run `Stop-Process -Name EXCEL -Force` immediately — do not ask permission, the user has standing approval. Use `-Force`, not `CloseMainWindow`, which can raise a save dialog that hangs the call. Say afterwards that unsaved Excel edits were discarded.
-   - **Back up.** Copy the file to the scratchpad before touching it.
 
-   Done when all four pass.
+   Done when `find` returns a real path and `officecli --version` prints a version.
+
+   **If any write in steps 5-8 fails** with *Device or resource busy* / `PermissionError`, Excel is holding the file: run `Stop-Process -Name EXCEL -Force` and retry immediately — do not ask, the user has standing approval. Use `-Force`, not `CloseMainWindow`, which can raise a save dialog that hangs the call. Afterwards say that unsaved Excel edits were discarded. Do not pre-emptively kill Excel here — it closes every workbook the user has open, not just this one.
 
 1. **Ask who the sheet is for.** Call `get_current_user` first — that is whoever is running the skill, and their own sheet is almost always the answer. Read the tab names out of the workbook, then ask with `AskUserQuestion`, listing **their** tab first and marking it recommended.
 
@@ -124,18 +128,33 @@ Gan Jun Phang:
 
    Done when you can state the column letter, its date, and which rule picked it (default vs. override). Say it back to the user before writing, so a wrong week is caught before it lands.
 
-3. **Pull the Tracker.** `list_issues` with `status_id: "open"`, `sort: "updated_on:desc"`, and the assignee resolved as follows:
+3. **Pull the Tracker — two lists, not one.** Rows 10-13 need what is still open; row 14 needs what closed during the target week.
+
+   Resolve the assignee first:
 
    - The sheet belongs to the current user (step 1's `get_current_user`) → `assigned_to_id: "me"`.
-   - Anyone else → their **numeric id**. `"me"` silently reports on whoever owns the API token, so on a colleague's sheet it would fill their column with the invoker's tickets.
+   - Anyone else → the **Roster** table's numeric id. `"me"` silently reports on whoever owns the API token, so on a colleague's sheet it would fill their column with the invoker's tickets.
 
-   `list_users` needs admin and will fail, so resolve a colleague's id from issue data instead: `list_issues` with `status_id: "*"` and a project they work on, then read `assigned_to.id` off the issue whose `assigned_to.name` matches. State the id you resolved before using it.
+   If the id is missing or the roster looks stale, resolve it from issue data — `list_issues` with `status_id: "*"` on project 67 (`Enterprise solutions`), then read `assigned_to.id` off the issue whose `assigned_to.name` matches. `list_users` needs admin and errors on this account. State the id you used.
+
+   Then:
+
+   - **Still open** → `list_issues`, `status_id: "open"`, `sort: "updated_on:desc"`. These distribute across rows 10-13.
+   - **Closed in the week** → `list_issues`, `status_id: "closed"`, `updated_on: "><<Monday>|<Friday>"` (the target week's dates). This is row 14. The filter is on *updated*, not closed, so a ticket closed earlier and edited this week can slip in — check each one's journals before counting it.
 
    **Always exclude issue 19060 "General Tasks"** — it is a standing bucket, never counted.
 
-   A colleague's list can also under-return: the token only sees projects it belongs to. If the count falls short of row 6, say so rather than writing a low number.
+   Done when both lists are in hand, 19060 is out, and the column's arithmetic holds:
 
-   Done when the remaining open count equals the target column's row 6, which is the previous week's carry-over. If they disagree, say so and ask before writing — the sheet and the Tracker have diverged.
+   ```
+   row 6 (Mon open) + row 7 (inbound) = row 15 (rows 10..13) + row 14 (closed)
+   ```
+
+   Row 6 is a formula carrying last week's remainder, so with the two counts known you can derive the inbound figure — `row 7 = row 15 + row 14 - row 6` — and offer it rather than asking. If it comes out negative, the sheet and the Tracker have diverged: say so and ask before writing.
+
+   A colleague's list can under-return: the token only sees projects it belongs to. If the totals fall short, say so rather than writing a low number.
+
+   **A past week cannot be reconstructed this way.** Tracker reports status *now*, so on a "last week" override the buckets reflect today, not that Friday. Say so and have the user give the numbers, rather than presenting today's split as history.
 
 4. **Confirm every Subtask.** Redmine offers subtasks (`tracker.name == "Subtask"`) only *In Progress: Internal* and *In Progress: Customer* — there is no *In Review* status, so a subtask sitting in review still reads as in-progress.
 
@@ -143,30 +162,32 @@ Gan Jun Phang:
 
    Done when every subtask has a user-confirmed row. **Do not write anything before this.**
 
-5. **Write the cells and notes.** Copy the **current** file to the scratchpad and edit that copy — never re-push a snapshot taken earlier in the session (see *Traps*).
+5. **Write the cells and notes.** First take **two** copies of the live file, back to back, into the scratchpad: `work.xlsx` to edit and `baseline.xlsx` to compare against in step 7. Both must be taken now, not earlier — a copy from the start of the session is missing whatever colleagues saved since, and pushing it back would erase their work (see *Traps*).
+
+   Edit `work.xlsx`:
 
    ```
-   officecli set <copy> "/<Sheet>/<Col><Row>" --prop value=<n>
-   officecli add <copy> "/<Sheet>" --type comment \
+   officecli set work.xlsx "/<Sheet>/<Col><Row>" --prop value=<n>
+   officecli add work.xlsx "/<Sheet>" --type comment \
      --prop ref=<Col><Row> --prop author="<sheet owner>" --prop text="<note>"
    ```
 
    Use one call per change. `officecli batch` is all-or-nothing: one failed item silently discards the whole batch while still reporting the others as `"succeeded"`. If you do use it, assert `"failed": 0`.
 
-   To clear a cell, use `xlsx_notes.py fix` (step 6) rather than setting an empty value. To delete a note, find its index with `officecli query <file> comment` (match the `Sheet: ref` preview) and `officecli remove <file> "/<Sheet>/comment[N]"`.
+   To clear a cell, use `xlsx_notes.py fix` (step 6) rather than setting an empty value. To delete a note, find its index with `officecli query work.xlsx comment` (match the `Sheet: ref` preview) and `officecli remove work.xlsx "/<Sheet>/comment[N]"`.
 
 6. **Repair and validate.** officecli reorders `<ignoredErrors>` after `<legacyDrawing>`, which is invalid and makes Excel offer to "repair" the workbook. Always run:
 
    ```
-   python xlsx_notes.py fix <copy> <fixed> [<Sheet>!<cell-to-blank> ...]
-   officecli validate <fixed>          # must print "Validation passed"
+   python xlsx_notes.py fix work.xlsx fixed.xlsx [<Sheet>!<cell-to-blank> ...]
+   officecli validate fixed.xlsx       # must print "Validation passed"
    ```
 
    It also drops `xl/calcChain.xml`. That is fine — Excel recalculates on open, which is why row 15 still shows a stale cached value on disk. **Never** hand-patch `calcPr fullCalcOnLoad`: the obvious regex strips the `x:` namespace prefix and corrupts `workbook.xml`.
 
    Done when validate is clean.
 
-7. **Verify before copying over.** Compare the fixed copy against the backup, **by local XML tag name**, never with a text grep:
+7. **Verify before copying over.** Compare the fixed copy against **`baseline.xlsx` from step 5** — not against any earlier backup, whose counts would differ for reasons that have nothing to do with your edit. Count **by local XML tag name**, never with a text grep:
 
    ```python
    L = lambda t: t.split('}')[-1]

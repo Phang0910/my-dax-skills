@@ -9,7 +9,7 @@ Update the weekly report that already exists under **Customer Success Weekly Rep
 
 ## Steps
 
-0. **Resolve the person.** Read the **Roster** table in `../weekly-report/SKILL.md` and match the argument against its aliases — that table is the only copy of the names, Tracker ids and folder ids. Gan Jun Phang is the default when no name is given; if a name is given but matches nobody, stop and ask. Done when you have the roster row in hand.
+0. **Resolve the person.** Read the **Roster** table in `../weekly-report/SKILL.md` and match the argument against its aliases — that table is the only copy of the names, Tracker ids and folder ids. With no name given, default to **whoever is running the skill**: call `get_current_user` and match its name against the `Tracker display name` column. This skill is shared, so never fall back to a fixed person. If a name is given but matches nobody, or the current user matches no row, stop and ask. Done when you have the roster row in hand.
 
 1. **Fix the week and find the doc.** Same week rule as `weekly-report`: the report is titled after the **Friday** of the target week (default: the Friday of the current week; an argument like "last week" or an explicit date overrides). Find it with `list_documents`, `collectionId: "e2fe74e9-2a93-4a8e-ae9f-901dc54457b2"`, query = that Friday's date.
 

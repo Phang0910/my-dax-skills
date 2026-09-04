@@ -19,7 +19,9 @@ Everything person-specific lives here. Sibling skill `update-weekly-report` read
 | `khor`, `wk`, `weakee` | Khor Wea Kee | 60 | WK Khor | `58f0f8f1-dcd4-41dc-a8a5-a632963300bb` |
 | `jayshree`, `jay` | Jayshree | 89 | Jayshree A/P Samugam | `91c9b5ed-bfec-4c55-abd8-37d04c7160c9` |
 
-All five folders sit in collection `e2fe74e9-2a93-4a8e-ae9f-901dc54457b2`. Match the argument case-insensitively against the aliases; **Gan Jun Phang is the default** when the argument carries no name. If the name is given but matches nobody, stop and ask rather than guessing.
+All five folders sit in collection `e2fe74e9-2a93-4a8e-ae9f-901dc54457b2`. Match the argument case-insensitively against the aliases. If the name is given but matches nobody, stop and ask rather than guessing.
+
+With no name given, the default is **whoever is running the skill** — call `get_current_user` and match its name against the `Tracker display name` column. This skill is shared across the team, so never fall back to a fixed person; if the current user matches no row, ask.
 
 Khor's own last two reports title as `<d month yyyy> — CS Manager Weekly Report (Khor)` and some of his older ones sit in a nested *Weekly Update* subfolder — for Khor, append that suffix to the title and still create in the folder root.
 

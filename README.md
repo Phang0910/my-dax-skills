@@ -1,6 +1,6 @@
 # my-dax-skills
 
-Personal Claude Code skills for D365FO / Dynamics work.
+Claude Code skills for the DAXONET Customer Success team — D365FO / Dynamics day-to-day work.
 
 This repo is both a **plugin marketplace** and the **plugin** itself, so one `marketplace add`
 plus one `install` is all it takes on a new machine.
@@ -17,6 +17,22 @@ Then restart Claude Code. Skills are invoked namespaced by the plugin:
 ```
 /my-dax-skills:draft-progress
 ```
+
+## What each skill needs
+
+Nothing here needs configuring up front — start with the skill you want and it tells you if
+something is missing. This table is only so you know what a prompt is asking for.
+
+| Skill | Needs | If it's missing |
+|---|---|---|
+| everything | the **Tracker** connector | enable it in Claude settings → Connectors |
+| `weekly-report`, `update-weekly-report`, `KB-this` | the **DAXONET Notes** connector | same place |
+| `raise-ms-support-ticket` | **Claude in Chrome** (optional) | send screenshots instead — the skill reads those |
+| `update-ES-weekly-sheet` | `officecli`, and the SharePoint folder synced | installs officecli for you; gives you one link + **Sync** for the folder |
+
+The three person-scoped skills — `weekly-report`, `update-weekly-report`, `update-ES-weekly-sheet` —
+default to **you**, resolved from your Tracker account rather than a name baked into the skill. Pass
+a name to work on a colleague's behalf. The rest are ticket-scoped: give them a ticket number.
 
 ## Skills
 
