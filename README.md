@@ -32,6 +32,7 @@ Then restart Claude Code. Skills are invoked namespaced by the plugin:
 | `close-ticket` | Closes a resolved Tracker ticket — sets the status, picks the Root Cause from the dropdown, writes the Resolution in the internal house style, and stamps today as the Resolution Date. The natural next step after `draft-closing-email`. |
 | `weekly-report` | Drafts this week's Customer Success Weekly Report in DAXONET Notes, pulled from the Tracker. |
 | `update-weekly-report` | Refreshes an existing weekly report doc — re-pulls the week, folds in what landed since, tightens the prose. |
+| `update-ES-weekly-sheet` | Fills a week's column in the ES Weekly Update team tracker spreadsheet from the Tracker — splits your open issues across the In Progress / In Review / Closed rows and writes the per-ticket Excel cell notes. |
 
 ### draft-progress
 
@@ -202,6 +203,17 @@ in the house format.
 Refreshes a weekly report that already exists. It rewrites and curates the whole report rather
 than appending bullets to the bottom — re-pulls the week, folds in what landed since, and tightens
 what is already there.
+
+### update-ES-weekly-sheet
+
+Writes one week's column on your sheet in `ES Weekly Update_Customer Success Team.xlsx` (the
+SharePoint-synced team tracker, not the Notes report). It pulls your open Tracker issues, asks you
+to confirm the real status of every Subtask — Redmine cannot express "In Review" on a subtask — and
+then writes both the counts and the per-ticket cell notes.
+
+Needs `officecli` installed; writing an Excel cell note touches the comments part, the VML drawing
+and the author table together, so it is not a hand-rollable XML edit. Reading notes is stdlib-only
+via the bundled `xlsx_notes.py`, which also repairs the schema damage officecli leaves behind.
 
 Both are `disable-model-invocation`, so they only run when you invoke them by name.
 
