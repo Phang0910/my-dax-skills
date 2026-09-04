@@ -29,6 +29,7 @@ something is missing. This table is only so you know what a prompt is asking for
 | `weekly-report`, `update-weekly-report`, `KB-this` | the **DAXONET Notes** connector | same place |
 | `raise-ms-support-ticket` | **Claude in Chrome** (optional) | send screenshots instead — the skill reads those |
 | `update-ES-weekly-sheet` | `officecli`, and the SharePoint folder synced | installs officecli for you; gives you one link + **Sync** for the folder |
+| `update-ES-weekly-sheet` in the **desktop app** | the synced folder added to the session | it tells you the exact path to pick in *Add folder* |
 
 The three person-scoped skills — `weekly-report`, `update-weekly-report`, `update-ES-weekly-sheet` —
 default to **you**, resolved from your Tracker account rather than a name baked into the skill. Pass

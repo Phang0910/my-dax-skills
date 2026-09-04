@@ -30,7 +30,26 @@ Two hits to reject:
 - **`ES Weekly Update_Customer Success Team.xlsx.url`, ~180 bytes** — someone ran *Add shortcut* on the **file** instead of syncing the **folder**. It has no content; treat it as not found and delete it once the real folder is synced.
 - **A copy in `~/Downloads`** — not usable. It is detached from SharePoint: edits there reach nobody, and it goes stale the moment a colleague saves. If that is all there is, treat it as not found, run the setup below, and tell the user to delete the stray copy so it cannot be picked up later.
 
-### If it is not on this machine (first run)
+### Read the `find` result before asking for anything
+
+Three outcomes, three different asks. Confusing them sends someone through setup they do not need — which has already happened once.
+
+| `find` did | Means | Do |
+|---|---|---|
+| printed a path | ready | carry on |
+| ran, printed nothing | not synced | the **Sync** click below |
+| errored, or `$HOME` is not readable | Claude cannot see that folder | **Grant access** below |
+
+### Grant access (Claude Code in the desktop app)
+
+The desktop app only reads folders the user has added to the session, so a synced workbook stays invisible until it is one of them. Settle which problem it is by asking them to open `C:\Users\<their name>\DAXONET GROUP\` in File Explorer — that costs them two seconds and saves a wrong instruction.
+
+- **The folder is there** → one action: *Add folder* in the desktop app, and give them the exact path to pick — `C:\Users\<their name>\DAXONET GROUP\Enterprise Solution - 08 Resources` (or the `OneDrive - DAXONET GROUP\...` one if that is where it sits). Then re-run the `find`. Ask for that folder alone, never the whole user folder.
+- **The folder is not there** → it was never synced. Do the **Sync** click first, then come back and add it.
+
+Say which of the two it is before asking. "I need access" and "you never synced it" are different problems, and guessing between them is what made the first attempt annoying.
+
+### The Sync click (first run on a machine)
 
 The workbook must be **synced**, so the edit reaches SharePoint through OneDrive. This is one click — never a tour of SharePoint's settings.
 
@@ -103,7 +122,7 @@ Gan Jun Phang:
 
 0. **Pre-flight.** Two checks, both of which you fix yourself rather than reporting.
 
-   - **Locate the workbook** with the `find` above. If it is missing, run the one-click sync setup from *Finding the file*, then poll until it appears. A copy in `Downloads` does not count as found.
+   - **Locate the workbook** with the `find` above, then follow the three-outcome table in *Finding the file* — a blocked `find` needs folder access, an empty one needs the Sync click. Do not conflate them. A copy in `Downloads` does not count as found.
    - **officecli.** Run `officecli --version`. If it is missing, **install it yourself** — do not ask, and do not make the user read instructions:
      ```powershell
      irm https://d.officecli.ai/install.ps1 | iex
@@ -216,6 +235,10 @@ An Excel note is not one XML edit. It needs an entry in `xl/comments*.xml`, a ma
 - **Therefore: always re-copy the live file immediately before editing.** Applying a staged full-file snapshot from earlier in the session overwrites colleagues' work that landed in between. Apply only the delta, on top of whatever is on disk now.
 - **Sync may be missing from the SharePoint toolbar.** With only item-level access, `⋯` offers nothing but `Alert me`, and the parent folder throws "Unknown render failure". That is a permissions problem, not a workaround problem: the user needs adding to the Enterprise Solution site. Never substitute a downloaded copy — it is detached from SharePoint, so the edit reaches nobody.
 
-- **This skill is used by the whole Customer Success team, not just its author.** Never mention another person's machine, username, or home directory, and never paste a `C:\Users\<someone-else>\...` path at the user. Resolve every path from `$USERPROFILE` on the machine you are running on.
+- **This skill is used by the whole Customer Success team, not just its author.** Never mention another person's machine, username, or home directory, and never paste a `C:\Users\<someone-else>\...` path at the user. Resolve every path from `$HOME` on the machine you are running on.
+
+- **In the desktop app, "cannot see the file" usually means "was not granted the folder".** The sandbox makes a synced workbook look missing. Diagnose before asking: a blocked `find` is a permissions problem, an empty one is a sync problem. Naming the wrong one sends the user to SharePoint when all they needed was *Add folder*.
+
+- **This skill needs shell access** for `find`, `officecli` and `python`. If commands cannot run in this environment at all, say so in one sentence and stop: cell notes cannot be written any other way, and the SharePoint connector can neither read nor write them.
 
 - **Keep setup to one action.** Anything a teammate must do by hand is one sentence with one link and one button. No numbered SharePoint UI tours, no "tick this, then expand that". If a check fails, do the fix yourself where you can (officecli) and ask for the single click where you cannot (`⋯` → **Sync**). Then verify it worked rather than asking them to confirm.
