@@ -17,27 +17,28 @@ The workbook lives in SharePoint at `/sites/EnterpriseSolution/Shared Documents/
 find "$USERPROFILE" -maxdepth 4 -name "ES Weekly Update_Customer Success Team.xlsx" -not -name '~$*' 2>/dev/null
 ```
 
-Sub-second, and it finds the file wherever it sits — a synced team-site folder (`~/DAXONET GROUP/...`, *not* `~/OneDrive - DAXONET GROUP/`), a OneDrive shortcut, or plain `~/Downloads`.
+Sub-second, and it finds the synced folder wherever OneDrive put it — commonly `~/DAXONET GROUP/Enterprise Solution - 08 Resources/`, which is a team-site sync root and *not* the same as `~/OneDrive - DAXONET GROUP/`.
 
-Two things follow from **where** it was found, and they decide how step 8 writes back:
+Two hits to reject:
 
-| Found in | Write back by |
-|---|---|
-| a synced folder (path contains `DAXONET GROUP` or `OneDrive`) | `cp` — OneDrive uploads it |
-| `Downloads`, or anywhere unsynced | `sharepoint_update_file` (see step 8) |
-
-Ignore any `.xlsx.url` hit of ~180 bytes: that is a single-file shortcut with no content, not the workbook.
+- **`ES Weekly Update_Customer Success Team.xlsx.url`, ~180 bytes** — a single-file shortcut. It has no content; treat it as not found and delete it once the real folder is synced.
+- **A copy in `~/Downloads`** — not usable. It is detached from SharePoint: edits there reach nobody, and it goes stale the moment a colleague saves. If that is all there is, treat it as not found, run the setup below, and tell the user to delete the stray copy so it cannot be picked up later.
 
 ### If it is not on this machine (first run)
 
-Do **not** walk the user through SharePoint's sync UI — it differs per tenant, the buttons hide behind `⋯`, and it fails outright for anyone with only item-level access. Ask for one click instead:
+The workbook must be **synced**, so the edit reaches SharePoint through OneDrive. This is one click — never a tour of SharePoint's settings.
 
-> Open this and click **Download**:
+Give exactly this, and nothing more:
+
+> Open this link, then click **Add shortcut to OneDrive** in the toolbar (don't select the file first):
 > https://daxonet0.sharepoint.com/sites/EnterpriseSolution/Shared%20Documents/Forms/AllItems.aspx?id=%2Fsites%2FEnterpriseSolution%2FShared%20Documents%2FGeneral%2F08%20Resources
 
-Then re-run the `find`. A file in `Downloads` is fully supported — the skill uploads the edit back through the connector, so nothing needs syncing, ever.
+Then verify it yourself — re-run the `find` every 10-15 seconds for up to about two minutes, since OneDrive downloads the folder in the background. Announce success as soon as the file appears; do not ask the user whether it worked.
 
-Offer the synced-folder route (**Add shortcut to OneDrive** on the *folder*) only as an optional nicety for someone who will do this weekly, and never as a prerequisite.
+If it still has not appeared:
+
+- **The button is missing from the toolbar** (only `Alert me` behind `⋯`, or the parent folder shows "Unknown render failure") — they have item-level access to the file but not the library, so no amount of clicking will work. Tell them to ask an Enterprise Solution site owner to add them to the site, then re-run. Do not offer a download as a substitute.
+- **The file is there but 0 bytes / "Available when online"** — Files On-Demand has not hydrated it yet. Reading it triggers the download; just read it and carry on.
 
 ## Roster
 
@@ -90,7 +91,7 @@ Gan Jun Phang:
 
 0. **Pre-flight.** All four, in order — each has burned a previous run.
 
-   - **Locate the workbook** with the `find` above. If it is missing, ask for the one **Download** click from *Finding the file* — one sentence and one link, nothing about sync settings.
+   - **Locate the workbook** with the `find` above. If it is missing, run the one-click sync setup from *Finding the file*, then poll until it appears. A copy in `Downloads` does not count as found.
    - **officecli.** Run `officecli --version`. If it is missing, **install it yourself** — do not ask, and do not make the user read instructions:
      ```powershell
      irm https://d.officecli.ai/install.ps1 | iex
@@ -169,21 +170,11 @@ Gan Jun Phang:
 
    Also confirm the other four people's sheets still hold their data (spot-check their row 6). Done when formulas match and only your notes were added.
 
-8. **Write back.** Which route depends on where step 0 found the file.
+8. **Write back and hand off.** `cp` the fixed copy onto the synced path — OneDrive uploads it from there.
 
-   **Synced folder** — `cp` the fixed copy onto that path. Then tell the user to **wait for the OneDrive tray icon to go green before opening Excel**; opening mid-sync gives a "no access" error and invites the revert in *Traps*.
+   Then tell the user to **wait for the OneDrive tray icon to go green before opening Excel**. Opening mid-sync gives a "no access" error and invites the revert in *Traps*.
 
-   **Downloads / unsynced** — push it through the connector, with a concurrency guard, because a blind overwrite would erase whatever a colleague saved while you worked:
-
-   1. `sharepoint_search` for the file at the *start* of the run and keep its `driveId`, `id` and `lastModifiedDateTime`.
-   2. Re-run that search now. If `lastModifiedDateTime` moved, **stop** — a colleague saved in the meantime. Re-acquire the file and reapply the delta; never upload over their change.
-   3. `sharepoint_update_file` with `driveId`, `itemId`, and the workbook as `contentBase64` (strict unbroken base64, no newlines). Pass `expectedBytes` only if you computed the byte length in the same step that produced the base64.
-
-   The library keeps version history, so a bad write is recoverable — but the timestamp check is what stops it happening.
-
-   Note the base64 payload is large (a ~55 KB workbook costs roughly 20k tokens). That is the price of needing no setup; prefer a synced copy for someone who runs this weekly.
-
-   Either way, finish by telling the user the exact cells and notes written, so they can eyeball one and stop.
+   Finish by listing the exact cells and notes written, so they can eyeball one and stop.
 
 ## Why officecli is mandatory
 
@@ -194,8 +185,8 @@ An Excel note is not one XML edit. It needs an entry in `xl/comments*.xml`, a ma
 - **The SharePoint connector cannot see cell notes.** `read_resource` returns values and formulas only. Read notes from the local file with `xlsx_notes.py read`. Never conclude "there are no notes" from a connector read.
 - **OneDrive can silently revert your write** (sync route only). Five people edit this workbook. If a colleague saves between your write and the upload, OneDrive cannot merge .xlsx — the server copy wins and your edit vanishes from disk. Symptom: the user opens the file and sees the change, closes it, reopens, and it is gone. Keep the write window short and verify afterwards. The connector route in step 8 avoids this by checking `lastModifiedDateTime` instead.
 - **Therefore: always re-copy the live file immediately before editing.** Applying a staged full-file snapshot from earlier in the session overwrites colleagues' work that landed in between. Apply only the delta, on top of whatever is on disk now.
-- **Sync / Add-shortcut may be missing from the SharePoint toolbar.** With only item-level access the parent folder throws "Unknown render failure" and the folder-level buttons never appear. This is why sync is never a prerequisite — go straight to **Download**.
+- **Add shortcut may be missing from the SharePoint toolbar.** With only item-level access the parent folder throws "Unknown render failure" and the folder-level buttons never appear. That is a permissions problem, not a workaround problem: the user needs adding to the Enterprise Solution site. Never substitute a downloaded copy — it is detached from SharePoint, so the edit reaches nobody.
 
 - **This skill is used by the whole Customer Success team, not just its author.** Never mention another person's machine, username, or home directory, and never paste a `C:\Users\<someone-else>\...` path at the user. Resolve every path from `$USERPROFILE` on the machine you are running on.
 
-- **Keep setup to one action.** Anything a teammate must do by hand is one sentence with one link and one button. No numbered SharePoint UI tours, no "tick this, then expand that". If a check fails, do the fix yourself where you can (officecli) and ask for the single click where you cannot (Download). Then verify it worked rather than asking them to confirm.
+- **Keep setup to one action.** Anything a teammate must do by hand is one sentence with one link and one button. No numbered SharePoint UI tours, no "tick this, then expand that". If a check fails, do the fix yourself where you can (officecli) and ask for the single click where you cannot (**Add shortcut to OneDrive**). Then verify it worked rather than asking them to confirm.

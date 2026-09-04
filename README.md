@@ -212,10 +212,10 @@ SharePoint-synced team tracker, not the Notes report). It pulls your open Tracke
 to confirm the real status of every Subtask — Redmine cannot express "In Review" on a subtask — and
 then writes both the counts and the per-ticket cell notes.
 
-Setup on a new machine is at most one click. It installs `officecli` for you (per-user, no admin),
-finds the workbook wherever it already sits on your disk, and if you do not have it yet, asks you
-to click **Download** once — a copy in `Downloads` is enough, because the edit is pushed back to
-SharePoint through the connector. Nothing needs syncing, and no SharePoint settings are touched.
+Setup on a new machine is one click. It installs `officecli` for you (per-user, no admin) and
+finds the workbook wherever OneDrive has put it, whatever your username. If it is not synced yet,
+it gives you one link and one button — **Add shortcut to OneDrive** — then waits and checks for
+itself, so you are not asked to confirm anything.
 
 `officecli` is required because writing an Excel cell note touches the comments part, the VML
 drawing and the author table together, so it is not a hand-rollable XML edit. Reading notes is
