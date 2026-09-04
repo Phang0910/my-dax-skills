@@ -152,7 +152,7 @@ real trade-offs, not being sold the one you prefer:
 | Label | Description |
 |---|---|
 | **Give me the guide, I'll proceed myself** | No setup and you see every screen before it happens — you do the clicking, but paste me anything that blocks you and I'll answer it. |
-| **You drive it in Chrome end to end** | Hands-off — I fill it in, submit, and write the case number to Tracker. You just sign in to the portal. *(setup clause — see below)* |
+| **I fully drive it end to end** | Hands-off — I fill it in, submit, and write the case number to Tracker. You just sign in to the portal. *(setup clause — see below)* |
 
 Neither is "recommended". They suit different moments: the first if you know the wizard or want
 to read every screen, the second if you would rather not touch it.
