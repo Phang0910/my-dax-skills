@@ -33,6 +33,7 @@ Then restart Claude Code. Skills are invoked namespaced by the plugin:
 | `weekly-report` | Drafts this week's Customer Success Weekly Report in DAXONET Notes, pulled from the Tracker. |
 | `update-weekly-report` | Refreshes an existing weekly report doc — re-pulls the week, folds in what landed since, tightens the prose. |
 | `update-ES-weekly-sheet` | Fills a week's column in the ES Weekly Update team tracker spreadsheet from the Tracker — splits your open issues across the In Progress / In Review / Closed rows and writes the per-ticket Excel cell notes. |
+| `KB-this` | Writes a knowledge base article about a resolved case and publishes it to DAXONET Notes under the customer's KB page, in the house format. |
 
 ### draft-progress
 
@@ -214,6 +215,22 @@ then writes both the counts and the per-ticket cell notes.
 Needs `officecli` installed; writing an Excel cell note touches the comments part, the VML drawing
 and the author table together, so it is not a hand-rollable XML edit. Reading notes is stdlib-only
 via the bundled `xlsx_notes.py`, which also repairs the schema damage officecli leaves behind.
+
+### KB-this
+
+Turns a resolved case into a KB article and publishes it to DAXONET Notes as a child of the
+customer's KB parent page (for Panasonic, the `PANASONIC` page).
+
+It reads *every* existing KB under that page before drafting, because the house format is adaptive
+— only **Date Resolved** and **Resolved By** appear in all of them, and the rest of the metadata
+table is fitted to the subject. The oldest Panasonic article uses a shape that was superseded two
+hours after it was written, so inferring the template from one article gets it wrong.
+
+Encodes the rest of what went wrong doing this by hand: `Reported by` is omitted rather than left
+as a placeholder, titles are capped at 100 characters, `list_documents` rejects a `collectionId`
+so the corpus has to be found by full-text search and filtered offline, and oversized search
+results are parsed from the saved file instead of retried smaller. Credentials that surfaced during
+the investigation never reach the article.
 
 Both are `disable-model-invocation`, so they only run when you invoke them by name.
 
