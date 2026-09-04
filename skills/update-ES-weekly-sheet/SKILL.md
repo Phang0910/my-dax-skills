@@ -11,13 +11,19 @@ Update one week's column on one person's sheet in **ES Weekly Update_Customer Su
 
 ## Finding the file
 
-The workbook lives in SharePoint at `/sites/EnterpriseSolution/Shared Documents/General/08 Resources/`. **Never hardcode a local path** — every teammate has a different username, and sync roots differ. Locate it:
+The workbook lives in SharePoint at `/sites/EnterpriseSolution/Shared Documents/General/08 Resources/`. **Never hardcode a local path.** Locate it:
 
 ```bash
-find "$USERPROFILE" -maxdepth 4 -name "ES Weekly Update_Customer Success Team.xlsx" -not -name '~$*' 2>/dev/null
+find "$HOME" -maxdepth 4 -name "ES Weekly Update_Customer Success Team.xlsx" -not -name '~$*' 2>/dev/null
 ```
 
-Sub-second, and it finds the synced folder wherever OneDrive put it — commonly `~/DAXONET GROUP/Enterprise Solution - 08 Resources/`, which is a team-site sync root and *not* the same as `~/OneDrive - DAXONET GROUP/`.
+Sub-second. Use `$HOME` (`/c/Users/<name>`), not `$USERPROFILE` — the latter is a Windows path and yields mixed separators like `C:\Users\x/DAXONET GROUP/...`.
+
+Search rather than assemble a path, because three things vary and a wrong guess makes the skill claim "not synced" and push someone through setup they already did:
+
+- **the username**, obviously;
+- **which root** — `⋯ → Sync` gives `~/DAXONET GROUP/Enterprise Solution - 08 Resources/`, while *Add shortcut to OneDrive* gives `~/OneDrive - DAXONET GROUP/...`. Both are live and correct; accept whichever exists;
+- **the sync location**, which OneDrive lets the user move, and which gets a numeric suffix if a folder of that name already exists.
 
 Two hits to reject:
 
