@@ -136,14 +136,25 @@ the filing.
 
 ### The question
 
-**One** `AskUserQuestion`, two options. Both encode approval; a correction arrives through the
-auto-added *Other*, so do not add a "something's wrong" option of your own and do not split this
-into two questions.
+**One** `AskUserQuestion`, two options. The **question text carries the approval** so the options
+can stay purely about the path — ask it as:
 
-- **"Looks right — give me the guide, I'll file it"** — you keep the pack and work through the
-  portal at your own pace.
-- **"Looks right — you drive it in Chrome and submit"** — I fill the form and click Create.
-  One-time extension setup, about 30 seconds.
+> Description and answers above look right? Pick how to file it:
+
+Picking either option therefore *is* the approval. A correction arrives through the auto-added
+*Other*, so do not add a "something's wrong" option of your own, and do not split this into two
+questions.
+
+Each option gets its upside **and** its cost in one sentence — the user is choosing between two
+real trade-offs, not being sold the one you prefer:
+
+| Label | Description |
+|---|---|
+| **Give me the guide, I'll proceed myself** | No setup and you see every screen before it happens — but you do the clicking, and you handle any question the pack didn't predict. |
+| **You drive it in Chrome end to end** | Hands-off, I fill it in and submit — but it needs a one-time 30-second extension setup, and the request goes to Microsoft without you seeing the final form. |
+
+Neither is "recommended". They suit different moments: the first if you know the wizard or want
+to read every screen, the second if you would rather not touch it.
 
 Do **not** pre-check whether the extension is connected before asking. If they pick Path B and it
 is not connected, Step B0 handles it.

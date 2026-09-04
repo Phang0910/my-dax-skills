@@ -166,17 +166,21 @@ answer for each — Power Platform Administration, Technical, Severity B, grant 
 the reason in a clause rather than a paragraph. Headed *likely asks, not a script*, because the
 Support agent pane makes up clarifying questions per case.
 
-Then one question, which approves the content and picks the path in the same click:
+Then one question — *does this look right, and how do you want it filed?* — which approves the
+content and picks the path in the same click. Both options come with their cost as well as their
+upside, because neither is the right answer every time:
 
-**Path A — "Looks right, give me the guide."** It gets out of the way. You work through the portal
-at your own pace with no round-trip per click, and paste or screenshot anything that does not
-match. The faster path when you already know the wizard.
+**"Give me the guide, I'll proceed myself."** No setup and you see every screen before it happens
+— but you do the clicking, and you handle any question the pack didn't predict. It gets out of
+the way and lets you work at your own pace with no round-trip per click. The better path when you
+already know the wizard.
 
-**Path B — "Looks right, you drive it and submit."** It fills the form and clicks **Create support
-request** itself. If the **Claude in Chrome** extension is not connected it sets up what it can
-and hands you only what is physically yours — one link, two clicks — then detects the connection
-rather than asking whether you have done it yet. Setup is one-time, about thirty seconds; if it
-still does not come up, it drops you to Path A instead of looping.
+**"You drive it in Chrome end to end."** Hands-off, it fills the form in and submits — but it
+needs a one-time thirty-second extension setup, and the request goes to Microsoft without you
+seeing the final form. If the **Claude in Chrome** extension is not connected it sets up what it
+can and hands you only what is physically yours — one link, two clicks — then detects the
+connection rather than asking whether you have done it yet. If it still does not come up, it
+drops you to the guide instead of looping.
 
 **In Path B the approval is the whole gate**, since nobody sees the form before Microsoft does.
 So one rule carries it: anything the portal asks that the approved pack does not answer **stops
