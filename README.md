@@ -27,7 +27,7 @@ something is missing. This table is only so you know what a prompt is asking for
 |---|---|---|
 | everything | the **Tracker** connector | enable it in Claude settings → Connectors |
 | `update-weekly-report`, `KB-this` | the **DAXONET Notes** connector | same place |
-| `raise-ms-support-ticket` | **Claude in Chrome** (optional) | send screenshots instead — the skill reads those |
+| `raise-ms-support-ticket` | **Claude in Chrome** (optional) | take the guide-pack path instead — it needs no browser at all |
 | `update-ES-weekly-sheet` | **Claude Code**, plus the SharePoint folder synced | it checks first and tells you to switch; installs `officecli` for you, and gives you one link + **Sync** for the folder |
 
 The two person-scoped skills — `update-weekly-report` and `update-ES-weekly-sheet` — default to **you**, resolved from your Tracker account rather than a name baked into the skill. Pass
@@ -45,7 +45,7 @@ Only `update-ES-weekly-sheet` is Claude Code-only — it edits the workbook on y
 | `draft-closing-email` | Drafts the final ticket-closure email for a resolved support case, in the DAXONET closure format, with the consultant hours taken from Tracker rather than the template. |
 | `draft-follow-up-email-chaser` | Drafts the chaser email on a case the customer has gone quiet on — picks the 1st/2nd follow-up, the 3rd that warns of closure, or the system-behaviour archive request, recommending the stage from the ticket's journals. |
 | `draft-follow-up-email-progress` | Drafts the progress-update email on a case still sitting on our side — where we are, and when the next update lands. |
-| `raise-ms-support-ticket` | Guides you through raising a Microsoft support request in the Power Platform admin center, one short step at a time — reads the live browser, or your screenshots if the Chrome extension is not connected, then writes the Microsoft ticket number into the Tracker ticket's Principal Case # field. |
+| `raise-ms-support-ticket` | Raises a Microsoft support request in the Power Platform admin center — asks whether you want a ready-to-paste guide pack you work through yourself, or want it driven live in Chrome, then writes the Microsoft ticket number into the Tracker ticket's Principal Case # field. |
 | `close-ticket` | Closes a resolved Tracker ticket — sets the status, picks the Root Cause from the dropdown, writes the Resolution in the internal house style, and stamps today as the Resolution Date. The natural next step after `draft-closing-email`. |
 | `update-weekly-report` | Owns the Customer Success Weekly Report in DAXONET Notes for a given week — creates that week's doc if there isn't one, otherwise rewrites the existing one, including any change you ask for by name. |
 | `update-ES-weekly-sheet` | Fills a week's column in the ES Weekly Update team tracker spreadsheet from the Tracker — splits your open issues across the In Progress / In Review / Closed rows and writes the per-ticket Excel cell notes. |
@@ -160,30 +160,35 @@ Requires the Tracker MCP server.
 Files a Microsoft support request without you having to hold the whole case in your head in front
 of a form that times out.
 
-**It starts at the browser.** No evidence pack, no case summary, no wall of text before anything
-happens — you already know the case you are filing. Every piece of text is produced at the moment
-the portal asks for it, including the description block, which arrives as a code block ready to
-paste when the field appears.
+**It asks you one question first: do you want the guide, or do you want it driven?**
 
-Each step is one screenful: what to click, at most one line of why, and the text to paste. It
-recommends the answers that matter — Power Platform Administration, Technical, Severity B, grant
-diagnostic consent — with the reason in a clause rather than a paragraph.
+**Path A — "Give me the guide, I'll do it."** One message, then it gets out of the way: the portal
+URL, the description block ready to paste, and the questions Microsoft is going to ask with the
+recommended answer for each — Power Platform Administration, Technical, Severity B, grant
+diagnostic consent — the reason in a clause rather than a paragraph. Headed *likely asks, not a
+script*, because the Support agent pane makes up clarifying questions per case. You work through
+the portal at your own pace with no round-trip per click, and paste or screenshot anything that
+does not match. This is the faster path when you know the wizard.
 
-It guides you through the Power Platform admin center — Support agent pane or the web-form
-fallback — reading the live page after each step so a validation error does not put the two of you
-out of sync. If the **Claude in Chrome** extension is not connected it says so, gives you the
-install link, and runs the identical flow on **one screenshot per step** instead. It never asks
-you to describe what happened in words; a screenshot is the page, your description is not.
+**Path B — "Drive it with me in Chrome."** It reads the live page and fills the form as you go,
+one screenful per step, so a validation error does not put the two of you out of sync. If the
+**Claude in Chrome** extension is not connected it sets up what it can itself and hands you only
+what is physically yours — one link, two clicks — then detects the connection rather than asking
+whether you have done it yet. Setup is one-time, about thirty seconds. If it still does not come
+up, it drops you to Path A instead of looping.
 
-Material comes from the conversation you are already in plus the Tracker ticket, and anything it
-cannot find is left **blank**. No questionnaire.
+Either way it never asks you to describe what happened in words; a screenshot is the page, your
+description is not. Material comes from the conversation you are already in plus the Tracker
+ticket, and anything it cannot find is left **blank**. No questionnaire beyond that first question.
 
-**It never signs in and it never clicks Create support request.** You do both. Afterwards it reads
-the ticket number off the confirmation page, shows it to you, and on your confirmation writes it to
-the Tracker ticket's Principal Case # field (`cf 43`), the only field it touches. Then it stops; chasing Microsoft's reply is the email skills' job.
+**It never signs in and it never clicks Create support request** — in either path. Judgement calls
+are shown to you before they are entered, never chosen silently. Afterwards it takes the ticket
+number, shows it to you, and on your confirmation writes it to the Tracker ticket's Principal
+Case # field (`cf 43`), the only field it touches. Then it stops; chasing Microsoft's reply is the
+email skills' job.
 
-Always PPAC, never Lifecycle Services. Needs the Tracker MCP and the `claude-in-chrome` extension —
-though with no browser it still gives you a description block you can file by hand.
+Always PPAC, never Lifecycle Services. Needs the Tracker MCP; the `claude-in-chrome` extension is
+Path B only.
 
 ### close-ticket
 

@@ -1,20 +1,25 @@
 ---
 name: raise-ms-support-ticket
-description: Guide the user step by step through raising a Microsoft support request in the Power Platform admin center — reading the live browser, or their screenshots — then write the resulting Microsoft ticket number into the Tracker ticket's Principal Case # field. Use when the user asks to raise, file, log or open a ticket with Microsoft on a D365FO / Power Platform issue.
+description: Raise a Microsoft support request in the Power Platform admin center — either by handing the user a ready-to-paste guide pack they work through themselves, or by driving Chrome end to end with them — then write the resulting Microsoft ticket number into the Tracker ticket's Principal Case # field. Use when the user asks to raise, file, log or open a ticket with Microsoft on a D365FO / Power Platform issue.
 argument-hint: "[ticket no]"
 ---
 
 # raise-ms-support-ticket
 
-Guide the user through the Power Platform admin center while they file a Microsoft support
-request, then write the Microsoft ticket number back to Tracker.
+Get a Microsoft support request filed against a Tracker case, and link the two.
 
-**The user drives the browser.** You observe, guide, draft text to paste, and recommend answers.
-You never fill the form and you never submit it.
+**Two ways to run it.** The user picks at Step 0:
 
-**Start at the browser.** No evidence pack, no description block, no case summary before the
-portal is open. Every piece of text is produced at the moment the portal asks for it, and each
-step is an instruction plus at most one line of why.
+| | **Path A — Guide pack** | **Path B — End-to-end in Chrome** |
+|---|---|---|
+| Who drives | The user, at their own pace | You, in their browser |
+| You send | One pack: URL, description block, likely questions with recommended answers | Live navigation and field entry |
+| User sends back | A screenshot or paste only if something is off-script | Nothing until the Create click |
+| Setup | None | One-time extension install, ~30s |
+
+**Absolute in both paths: you never click "Create support request".** The user clicks it. Same
+principle as `draft-email` never sending — the request goes to Microsoft under their name, on a
+real customer case, and they review the whole form before it leaves.
 
 **Done when** the support request exists and its number is in the Tracker ticket's
 **Principal Case #** field. Tracking Microsoft's replies, chasing, escalating, or posting their
@@ -25,47 +30,57 @@ answers back to Tracker is *not* this skill — that is the normal email and Tra
 ## Hard rules
 
 1. **Never ask for, receive, or type credentials.** The user signs in. You wait and read the page.
-2. **Never click "Create support request".** That final action is the user's — the same principle
-   as `draft-email` never sending.
-3. **Never answer Microsoft's questions on the user's behalf.** Give a *recommended answer* in a
-   code block for them to read, edit and paste.
-4. **The page is the source of truth, never the user's description.** Do not ask the user to report
-   what happened. End each step with "tell me when that's done" and treat their next message —
-   whatever it says — purely as the cue to read the page. The browser tools are pull-only, so the
-   cue is only for *timing*; the *state* always comes from the page. A validation error after Next
-   is the common desync, and only the page reveals it. Without the extension, a **screenshot** is
-   the page — ask for one per step and read it the same way.
+2. **Never click "Create support request".** Both paths. That final action is the user's.
+3. **Judgement answers are shown, never chosen silently.** Product, request type, severity,
+   diagnostic consent, and anything the Support agent pane asks that turns on the user's
+   judgement — give a *recommended answer* for them to read, edit and accept.
+   - *Path A:* in a code block, for them to paste.
+   - *Path B:* state the value and the one-line reason, then enter it. Derived facts you parsed
+     yourself — environment ID, error text, correlation ID — you enter without asking.
+4. **The page is the source of truth, never the user's description.** *Path B and the Path A
+   screenshot fallback:* end each step with "tell me when that's done" and treat their next
+   message — whatever it says — purely as the cue to read the page. The browser tools are
+   pull-only, so the cue is only for *timing*; the *state* always comes from the page. A
+   validation error after Next is the common desync, and only the page reveals it. A
+   **screenshot** is the page; the user's description of it is not.
 5. **Do not check role or support-plan prerequisites.** Invoking the skill means the user has
    already confirmed them. Do not re-litigate.
 6. **Never trigger browser dialogs** (alert / confirm / prompt) — they block the extension.
-7. **Stop and ask after 2–3 failed browser calls.** Do not loop.
+7. **Stop and ask after 2–3 failed browser calls.** Do not loop. This ceiling also governs the
+   Path B setup poll.
 8. **Write no files.** Everything goes to chat as markdown. No scratch files, no saved pack, no
    logs. The only thing written anywhere is the one Tracker field update at the end.
-9. **Never interrogate the user.** No upfront questionnaire, no field-by-field prompting. Derive
-   what you can; leave what you cannot **blank** and move on. A blank the user fills in ten seconds
-   beats five questions they answer before anything happens. The same applies to recommended
-   answers — if the basis for one is not there, leave it blank rather than inventing it.
-10. **One screenful per step.** The instruction, one line of why, and the text to paste. Nothing
-    else. No case recaps, no previews of later steps, no re-justifying a decision already taken.
+9. **One question, then work.** The Step 0 path question is the *only* thing you may ask before
+   producing something. Beyond it: no questionnaire, no field-by-field prompting. Derive what you
+   can; leave what you cannot **blank** and move on. A blank the user fills in ten seconds beats
+   five questions they answer before anything happens. Same for recommended answers — if the
+   basis for one is not there, leave it blank rather than inventing it.
+10. **Path B: one screenful per step.** The instruction, one line of why, the text to paste.
+    No case recaps, no previews of later steps, no re-justifying a decision already taken.
+    **This does not apply to the Path A pack**, which is deliberately one larger message.
 
 ---
 
-## Step 0 — Resolve the ticket, then go
+## Step 0 — Resolve the ticket, then ask which path
 
 Resolve the Tracker ticket (ask only if it was not given; read it back by subject in one line to
-confirm). Then **open the browser**.
+confirm). Then ask the path question with `AskUserQuestion` — **one** question, two options, in
+this order:
 
-That is the whole of Step 0. Do not print an evidence pack, a description block, an attachment
-list, or a summary of the case up front. The user filing the ticket already knows the case —
-a wall of text before anything happens is time spent reading back what they told you.
+- **"Give me the guide, I'll do it"** — you get the URL, a ready-to-paste description, and the
+  answers to the questions Microsoft will ask. You work through the portal at your own pace.
+- **"Drive it with me in Chrome"** — I read the page and fill the form as we go; you click the
+  final Create. One-time extension setup, about 30 seconds.
 
-Everything the portal needs is produced **at the moment the portal asks for it**, and nothing
-sooner.
+Do **not** pre-check whether the extension is connected before asking. If they pick Path B and it
+is not connected, Step B0 handles it.
+
+Do not print an evidence pack, a description block, an attachment list, or a case summary
+*before* the question. The user filing the ticket already knows the case.
 
 ### Where the material comes from
 
-When you do need to produce something — the description text, an answer to a clarifying question —
-build it from these, in order, without interviewing the user:
+Build every piece of text from these, in order, without interviewing the user:
 
 | Source | What it yields |
 |---|---|
@@ -76,19 +91,118 @@ build it from these, in order, without interviewing the user:
 
 Anything you cannot find is left **blank** for the user to fill. Never ask for it up front.
 
+**Always the Power Platform admin center.** Lifecycle Services is out of scope: do not route to
+it, do not mention it, do not build a walkthrough for it.
+
 ---
 
-## Step 1 — Is Claude in Chrome available?
+## Path A — The guide pack
 
-Check before promising to drive anything. Load the tools in **one** `ToolSearch` call:
+**One message, then get out of the way.** Everything the user needs to file the request alone.
+
+This is the one place the "no wall of text" instinct is deliberately off. The pack is new
+information the user cannot produce themselves — not a recap of what they already told you.
+
+The pack, in this order:
+
+### 1. The URL
+
+```
+https://admin.powerplatform.microsoft.com/support/requests
+```
+
+### 2. The description block
+
+A fenced code block, the text only, ready to paste. Include the verbatim error, the environment
+and account IDs, the correlation ID / timestamp / client machine name Microsoft's FAQ requires,
+the evidence ruling out a local cause, the Learn link, and numbered questions.
+
+`reference/example-19119.md` is a fully worked one — read it for the shape, not the contents.
+
+Say nothing about it beyond "paste this into the description field". Do not narrate what is in it.
+
+### 3. Likely asks, and how to answer
+
+Head this section **"Likely asks — not a script."** The Support agent pane generates clarifying
+questions per case and Microsoft reshuffles the wizard, so some of this will not match. Say that
+in the pack itself, in one line, or the first mismatch makes the user distrust the whole thing.
+
+The fixed choices, each with its one-line reason:
+
+| Portal field | Recommend | The one-line reason |
+|---|---|---|
+| Product | **Power Platform Administration**, for a Dataverse issue on a Power Platform-managed environment | Wrong product means misrouting and days lost |
+| Request type | **Technical** | Advisory gets a genuine fault closed rather than fixed |
+| Severity | **B**, or C | A commits you to round-the-clock engagement and is auto-downgraded if you cannot |
+| Affected environment | Pick it from the list; if absent, **"My environment is not listed"** and paste the URL | — |
+| Diagnostic consent | **Grant** | Without it Microsoft cannot look, and comes back to ask — a day gone |
+
+Then the case-specific ones you can anticipate — the predicted-product confirmation, the
+category / subcategory if the case suggests one, the date the issue occurred. Give the
+recommended answer in a code block wherever it is text to paste.
+
+Fit these to the case in front of you. Give the reason once, in one clause.
+
+### 4. Attachments
+
+One line, and only if relevant: not required to create the request, Microsoft's first reply
+usually asks, and anything unobtainable should be stated in the ticket rather than stalling
+the filing.
+
+### 5. The close
+
+Two instructions, no more:
+
+> Anything that doesn't match the above — a question not on this list, a validation error, a
+> screen that looks wrong — screenshot it or paste it here and I'll answer it.
+>
+> When the request is created, reply with the case number and I'll write it into Tracker.
+
+Do **not** offer "or paste it into Tracker yourself". Two choices means some users do neither and
+Principal Case # stays empty.
+
+Then stop. Do not follow up unprompted.
+
+### When they come back mid-flow
+
+A screenshot or a pasted question is the cue to answer *that one thing* and hand control back —
+not to switch into a step-by-step loop. Rule 4 applies: read the screenshot, do not ask them to
+describe it. If they clearly want you to take over from there, switch to Path B.
+
+---
+
+## Path B — End to end in Chrome
+
+### Step B0 — Setup, done by you wherever it can be
+
+Load the tools in **one** `ToolSearch` call:
 
 ```
 select:mcp__claude-in-chrome__tabs_context_mcp,mcp__claude-in-chrome__tabs_create_mcp,mcp__claude-in-chrome__navigate,mcp__claude-in-chrome__read_page,mcp__claude-in-chrome__computer,mcp__claude-in-chrome__get_page_text
 ```
 
-Then call `tabs_context_mcp`. It either returns the user's tabs or it fails.
+Then call `tabs_context_mcp`. If it returns tabs, setup is already done — say nothing about it
+and go to Step B1.
 
-### Connected — drive the browser
+If it fails, do the automatable half yourself and hand the user only what is physically theirs:
+
+- **You:** register the MCP server if it is missing (`claude mcp list`, then add it).
+- **You:** verify the connection by polling `tabs_context_mcp`. Do **not** ask "have you done it
+  yet?" — detect it.
+- **The user, unavoidably:** the Chrome Web Store install and the site-permission grant. Both are
+  browser-UI clicks behind a security boundary, and the extension is the very thing that would
+  let you click them.
+
+Give it as one link and two clicks, not a paragraph:
+
+> Install: https://chromewebstore.google.com/detail/claude/fcoeoabgfenejglbffodgkkbkcdhcgfn
+> Add to Chrome → then click the Claude icon and allow `admin.powerplatform.microsoft.com`.
+> I'll pick it up automatically. (Setup guide: https://code.claude.com/docs/en/chrome)
+
+Poll for the connection under the rule 7 ceiling. If it is still not up, say so plainly and offer
+to drop to Path A. Do not keep retrying.
+
+### Step B1 — Open the portal
 
 Create a **new tab** (do not hijack an existing one) and navigate to:
 
@@ -98,69 +212,42 @@ https://admin.powerplatform.microsoft.com/support/requests
 
 Read the page yourself after each step. Do not ask for screenshots.
 
-### Not connected — run on screenshots
+### Step B2 — Sign-in
 
-Say so in one line and give them the link:
+Tell the user to sign in. Do not touch it. Then confirm from the page that they landed on
+**Support requests**.
 
-> Claude in Chrome isn't connected here, so I can't read the page myself. Install it from
-> https://chromewebstore.google.com/detail/claude/fcoeoabgfenejglbffodgkkbkcdhcgfn (setup:
-> https://code.claude.com/docs/en/chrome), or just send me a screenshot at each step and I'll
-> guide you the same way.
+### Step B3..N — The guided loop
 
-Then run the identical flow, with **a screenshot standing in for the page read**. Ask for one
-screenshot per step — that is all you need, and it is enough. Do not ask the user to describe
-what happened in words; rule 4 holds either way, because a screenshot is the page and their
-description is not.
+Per step: **the action, then the reason in one short line.** That is the whole shape.
 
-Tell them the URL to open themselves:
-`https://admin.powerplatform.microsoft.com/support/requests`
-
-**Always the Power Platform admin center.** Lifecycle Services is out of scope: do not route to
-it, do not mention it, do not build a walkthrough for it.
-
-## Step 2 — Sign-in
-
-Tell the user to sign in. Do not touch it. Then confirm from the page (or their screenshot) that
-they landed on **Support requests**.
-
-## Step 3..N — The guided loop
-
-Per step: **the instruction, then the reason in one short line.** That is the whole shape.
-
-1. What to click — menu path as `A > B > C`, one action per numbered line.
+1. What you are entering or clicking — one action per numbered line.
 2. Why, in **one sentence at most**, and only where the choice is not obvious. Skip it entirely
-   for a plain "click Next".
-3. Where the portal asks for text, give it in a code block — the text only, no preamble.
-4. Close with "tell me when that's done" — no y/n, no "what happened?".
-5. On their cue, read the page (or their screenshot) and work out the real state from it.
-6. If it does not match what the step expected, say so and guide the correction rather than
-   advancing.
+   for a plain "clicking Next".
+3. Judgement answers per rule 3: state the value and the one-line reason before entering it.
+4. Read the page and work out the real state from it.
+5. If it does not match what the step expected, say so and correct rather than advancing.
 
-**Keep it short.** One screenful per step. The user is in front of a live form that can time out,
-and they are reading you on a phone-sized terminal pane. Do not restate the case, do not
-re-explain a decision already made, and do not pad a recommendation with its full justification —
-the reason is one clause, not a paragraph.
+Where the portal reaches the **description field**, produce the block then — same content as the
+Path A pack's block. Enter it, and say nothing beyond that you have.
+
+**Keep it short.** One screenful per step. The user is watching a live form that can time out, on
+a phone-sized terminal pane. Do not restate the case, do not re-explain a decision already made.
 
 Wrong:
 
-> Click **No**. This has nothing to do with Copilot Studio. Getting the product wrong here is the
-> documented cause of misrouting and days of delay, so it's worth correcting firmly. If it then
-> asks you to name the product or offers a picker, aim for Power Platform Administration…
+> Selecting **No**. This has nothing to do with Copilot Studio. Getting the product wrong here is
+> the documented cause of misrouting and days of delay, so it's worth correcting firmly. If it
+> then asks you to name the product or offers a picker, aim for Power Platform Administration…
 
 Right:
 
-> Click **No** — wrong product, and misrouting here costs days.
->
-> If it asks you to name the product, paste:
-> ```
-> Power Platform Administration - Dataverse privilege failure on a Unified Developer
-> Environment during module deployment from Visual Studio.
-> ```
+> Selecting **No** — wrong product, and misrouting here costs days.
 
 ### The wizard, for your own orientation
 
-PPAC leads with a **Support agent** pane; a **Switch to web form** fallback exists and both must be
-handled. The stages, roughly:
+PPAC leads with a **Support agent** pane; a **Switch to web form** fallback exists and both must
+be handled. The stages, roughly:
 
 1. **Get support** — the Support agent pane opens
 2. Describe the issue, then confirm or correct the **predicted product**
@@ -170,43 +257,24 @@ handled. The stages, roughly:
 6. **Technical** vs Advisory · support plan · **severity** · date the issue occurred
 7. Affected environment — if it is not listed, "My environment is not listed" and paste the URL
 8. Contact preferences and **advanced diagnostic consent**
-9. The user clicks **Create support request**
+9. **The user clicks Create support request** — you stop here and hand over
 
 This list is for you, not for the user. Do not print it as a preview of what is coming — take the
 stages one at a time as the portal reaches them.
 
-### The description field
+### Step B-final — Hand over the Create click
 
-When the portal reaches the description, produce the block **then** — in a fenced code block, the
-text only, ready to paste. Include the verbatim error, the environment and account IDs, the
-correlation ID / timestamp / client machine name Microsoft's FAQ requires, the evidence ruling out
-a local cause, the Learn link, and numbered questions.
+The form is complete. Tell the user in one line to review it and click **Create support request**
+themselves. Do not click it. Do not offer to.
 
-`reference/example-19119.md` is a fully worked one — read it for the shape, not the contents.
-
-Say nothing about it beyond "paste this into the description field". Do not narrate what is in it.
-
-### Attachments
-
-Mention them **once**, in one line, and only if the portal offers an upload: attachments are not
-required to create the request, Microsoft's first reply usually asks, and anything unobtainable
-should be stated in the ticket rather than stalling the filing.
-
-### Recommendations to make
-
-| Portal field | Recommend | The one-line reason |
-|---|---|---|
-| Product | **Power Platform Administration**, for a Dataverse issue on a Power Platform-managed environment | Wrong product means misrouting and days lost |
-| Request type | **Technical** | Advisory gets a genuine fault closed rather than fixed |
-| Severity | **B**, or C | A commits you to round-the-clock engagement and is auto-downgraded if you cannot |
-| Diagnostic consent | **Grant** | Without it Microsoft cannot look, and comes back to ask — a day gone |
-
-Fit these to the case in front of you. Give the reason, but give it once and in one clause.
+---
 
 ## Step N+1 — Capture the Microsoft ticket number
 
-Read it off the confirmation page — a 16-digit case number, e.g. `2608020030001071`. Show it to
-the user and have them **confirm it is correct** before anything is written to Tracker.
+*Path A:* the user replies with it. *Path B:* read it off the confirmation page.
+
+A 16-digit case number, e.g. `2608020030001071`. Show it to the user and have them **confirm it
+is correct** before anything is written to Tracker.
 
 ## Step N+2 — Write it into Principal Case #
 
