@@ -33,6 +33,10 @@ The workbook lives in SharePoint at `/sites/EnterpriseSolution/Shared Documents/
 find "$HOME" -maxdepth 4 -name "ES Weekly Update_Customer Success Team.xlsx" -not -name '~$*' 2>/dev/null
 ```
 
+One command, no `||` chaining — a hook that reformats command output can swallow the exit code and turn a working search into a false "not found".
+
+The tidiest way to run this is with Claude Code **opened in the synced folder itself**, which puts the workbook in the session's own directory and settles any question of what it can reach. Worth mentioning once the user is set up; the `find` covers them either way.
+
 Sub-second. Use `$HOME` (`/c/Users/<name>`), not `$USERPROFILE` — the latter is a Windows path and yields mixed separators like `C:\Users\x/DAXONET GROUP/...`.
 
 Search rather than assemble a path, because three things vary and a wrong guess makes the skill claim "not synced" and push someone through setup they already did:

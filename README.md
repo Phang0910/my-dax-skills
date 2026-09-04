@@ -227,7 +227,11 @@ SharePoint-synced team tracker, not the Notes report). It pulls your open Tracke
 to confirm the real status of every Subtask — Redmine cannot express "In Review" on a subtask — and
 then writes both the counts and the per-ticket cell notes.
 
-Setup on a new machine is one click. It installs `officecli` for you (per-user, no admin) and
+First run, once per person: install this plugin, enable the Tracker connector, and click **Sync**
+on the SharePoint folder (that click is what puts the workbook on your disk). Then open Claude Code
+in that synced folder and run the skill. `officecli` installs itself.
+
+The rest is automatic. It installs `officecli` for you (per-user, no admin) and
 finds the workbook wherever OneDrive has put it, whatever your username. If it is not synced yet,
 it gives you one link and one button — the toolbar's `⋯` then **Sync** — and then waits and
 checks for itself, so you are not asked to confirm anything.
