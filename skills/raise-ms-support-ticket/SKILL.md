@@ -15,9 +15,10 @@ will ask for, show them, and ask a single question that approves the content *an
 |---|---|---|
 | Who files it | The user, at their own pace | You |
 | After approval you send | Nothing more — they have the pack | Live progress, one screenful per step |
-| User sends back | A screenshot or paste only if something is off-script | Nothing, unless the portal asks something the pack did not cover |
+| User sends back | A screenshot or paste whenever something blocks them | Nothing, unless the portal asks something the pack did not cover |
 | Who submits | The user clicks Create | **You click Create** |
-| Setup | None | One-time extension install, ~30s |
+| Tracker write | On the case number they reply with, confirmed | Straight through, no confirmation |
+| Setup | None | One-time extension install, ~30s — **only if not already connected**, which you check before asking |
 
 **The approval is the gate.** In Path B nobody reviews the form before it reaches Microsoft, so the
 pack the user approved is the whole of their review. That makes one rule load-bearing: **if the
@@ -150,14 +151,23 @@ real trade-offs, not being sold the one you prefer:
 
 | Label | Description |
 |---|---|
-| **Give me the guide, I'll proceed myself** | No setup and you see every screen before it happens — but you do the clicking, and you handle any question the pack didn't predict. |
-| **You drive it in Chrome end to end** | Hands-off, I fill it in and submit — but it needs a one-time 30-second extension setup, and the request goes to Microsoft without you seeing the final form. |
+| **Give me the guide, I'll proceed myself** | No setup and you see every screen before it happens — you do the clicking, but paste me anything that blocks you and I'll answer it. |
+| **You drive it in Chrome end to end** | Hands-off — I fill it in, submit, and write the case number to Tracker without needing anything further from you. *(setup clause — see below)* |
 
 Neither is "recommended". They suit different moments: the first if you know the wizard or want
 to read every screen, the second if you would rather not touch it.
 
-Do **not** pre-check whether the extension is connected before asking. If they pick Path B and it
-is not connected, Step B0 handles it.
+**Check the extension before you ask, and word option 2 from what you find.** Load the browser
+tools and call `tabs_context_mcp` (Step B0 has the `ToolSearch` line). Do not hardcode a setup
+cost the user may not owe:
+
+- **Connected** → *"Hands-off — I fill it in, submit, and write the case number to Tracker without
+  needing anything further from you. Chrome's already connected, so there's no setup."*
+- **Not connected** → append *"...but it needs a one-time extension install first, about 30
+  seconds."*
+
+Run this check silently. Say nothing about it unless they pick option 2 and setup is actually
+needed.
 
 If they come back with a correction instead, fix the pack, show the changed part only, and ask
 again — not the whole pack a second time.
@@ -193,16 +203,17 @@ describe it. If they clearly want you to take over from there, switch to Path B.
 
 ### Step B0 — Setup, done by you wherever it can be
 
-Load the tools in **one** `ToolSearch` call:
+You already know the answer from the Step 0 check. If the extension was connected, say nothing
+about setup at all and go straight to Step B1.
+
+The `ToolSearch` line, for the Step 0 check and for here — load the tools in **one** call:
 
 ```
 select:mcp__claude-in-chrome__tabs_context_mcp,mcp__claude-in-chrome__tabs_create_mcp,mcp__claude-in-chrome__navigate,mcp__claude-in-chrome__read_page,mcp__claude-in-chrome__computer,mcp__claude-in-chrome__get_page_text
 ```
 
-Then call `tabs_context_mcp`. If it returns tabs, setup is already done — say nothing about it
-and go to Step B1.
-
-If it fails, do the automatable half yourself and hand the user only what is physically theirs:
+If it was not connected, do the automatable half yourself and hand the user only what is
+physically theirs:
 
 - **You:** register the MCP server if it is missing (`claude mcp list`, then add it).
 - **You:** verify the connection by polling `tabs_context_mcp`. Do **not** ask "have you done it
@@ -294,10 +305,14 @@ succeeded.
 
 ## Step N+1 — Capture the Microsoft ticket number
 
-*Path A:* the user replies with it. *Path B:* read it off the confirmation page.
+A 16-digit case number, e.g. `2608020030001071`.
 
-A 16-digit case number, e.g. `2608020030001071`. Show it to the user and have them **confirm it
-is correct** before anything is written to Tracker.
+*Path A:* the user replies with it. Echo it back and have them **confirm it is correct** before
+writing — they typed it, so a transcription slip is the likely error.
+
+*Path B:* read it off the confirmation page and write it straight through. Do **not** stop to ask.
+Option 2 promised nothing further would be needed from them, and the number was read off the page
+rather than guessed. Report it after the write, not before.
 
 ## Step N+2 — Write it into Principal Case #
 
@@ -318,8 +333,9 @@ the link was recorded.
    the Azure DevOps work item — and `cf 52` / `cf 53` are Resolution and Resolution Date, which
    belong to `close-ticket`. If you want to sanity-check before writing, `get_issue` on a ticket
    that already went to Microsoft and confirm `cf 43` holds a 16-digit case number.
-2. Show the user the field and the value about to be written.
-3. On confirmation, `update_issue` setting **only** that custom field. Do not touch `status_id`,
-   `assigned_to_id`, `done_ratio`, or anything else.
+2. *Path A only:* show the user the field and the value about to be written, and wait. *Path B:*
+   write it without asking — see Step N+1.
+3. `update_issue` setting **only** that custom field. Do not touch `status_id`, `assigned_to_id`,
+   `done_ratio`, or anything else.
 
 Confirm in one line that the field is set, and stop. The job is done.

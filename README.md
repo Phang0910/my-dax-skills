@@ -171,16 +171,16 @@ content and picks the path in the same click. Both options come with their cost 
 upside, because neither is the right answer every time:
 
 **"Give me the guide, I'll proceed myself."** No setup and you see every screen before it happens
-— but you do the clicking, and you handle any question the pack didn't predict. It gets out of
-the way and lets you work at your own pace with no round-trip per click. The better path when you
+— you do the clicking, but paste it anything that blocks you and it answers. It gets out of the
+way and lets you work at your own pace with no round-trip per click. The better path when you
 already know the wizard.
 
-**"You drive it in Chrome end to end."** Hands-off, it fills the form in and submits — but it
-needs a one-time thirty-second extension setup, and the request goes to Microsoft without you
-seeing the final form. If the **Claude in Chrome** extension is not connected it sets up what it
-can and hands you only what is physically yours — one link, two clicks — then detects the
-connection rather than asking whether you have done it yet. If it still does not come up, it
-drops you to the guide instead of looping.
+**"You drive it in Chrome end to end."** Hands-off — it fills the form in, submits, and writes the
+case number to Tracker without needing anything further from you. It checks whether **Claude in
+Chrome** is already connected *before* offering this, so it never quotes you a setup cost you do
+not owe. If it is not connected it sets up what it can and hands you only what is physically
+yours — one link, two clicks — then detects the connection rather than asking whether you have
+done it yet. If it still does not come up, it drops you to the guide instead of looping.
 
 **In Path B the approval is the whole gate**, since nobody sees the form before Microsoft does.
 So one rule carries it: anything the portal asks that the approved pack does not answer **stops
@@ -193,9 +193,10 @@ is not. **It never signs in** — that is always you. Material comes from the co
 already in plus the Tracker ticket, and anything it cannot find is left **blank**. No
 questionnaire.
 
-Afterwards it takes the ticket number, shows it to you, and on your confirmation writes it to the
-Tracker ticket's Principal Case # field (`cf 43`), the only field it touches. Then it stops;
-chasing Microsoft's reply is the email skills' job.
+Afterwards the ticket number goes into the Tracker ticket's Principal Case # field (`cf 43`), the
+only field it touches — read off the confirmation page and written straight through if it drove,
+echoed back for your confirmation if you filed it yourself and typed it. Then it stops; chasing
+Microsoft's reply is the email skills' job.
 
 Always PPAC, never Lifecycle Services. Needs the Tracker MCP; the `claude-in-chrome` extension is
 Path B only.
