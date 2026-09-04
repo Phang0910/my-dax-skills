@@ -174,8 +174,9 @@ Show the user, together:
 
 Then use `AskUserQuestion` — options: publish it / edit first / cancel.
 
-Treat any edit as a redraft, then confirm again. Save the draft to a local `.md` file first so it
-survives if publishing fails.
+Treat any edit as a redraft, then confirm again. On approval publish straight to Notes — do not
+write the draft to a local file first. If publishing fails, the draft is still in the conversation
+to retry from.
 
 ## Step 5 — Publish
 

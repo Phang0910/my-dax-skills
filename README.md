@@ -26,14 +26,14 @@ something is missing. This table is only so you know what a prompt is asking for
 | Skill | Needs | If it's missing |
 |---|---|---|
 | everything | the **Tracker** connector | enable it in Claude settings → Connectors |
-| `weekly-report`, `update-weekly-report`, `KB-this` | the **DAXONET Notes** connector | same place |
+| `update-weekly-report`, `KB-this` | the **DAXONET Notes** connector | same place |
 | `raise-ms-support-ticket` | **Claude in Chrome** (optional) | send screenshots instead — the skill reads those |
-| `update-ES-weekly-sheet` | `officecli`, and the SharePoint folder synced | installs officecli for you; gives you one link + **Sync** for the folder |
-| `update-ES-weekly-sheet` in the **desktop app** | the synced folder added to the session | it tells you the exact path to pick in *Add folder* |
+| `update-ES-weekly-sheet` | **Claude Code**, plus the SharePoint folder synced | it checks first and tells you to switch; installs `officecli` for you, and gives you one link + **Sync** for the folder |
 
-The three person-scoped skills — `weekly-report`, `update-weekly-report`, `update-ES-weekly-sheet` —
-default to **you**, resolved from your Tracker account rather than a name baked into the skill. Pass
+The two person-scoped skills — `update-weekly-report` and `update-ES-weekly-sheet` — default to **you**, resolved from your Tracker account rather than a name baked into the skill. Pass
 a name to work on a colleague's behalf. The rest are ticket-scoped: give them a ticket number.
+
+Only `update-ES-weekly-sheet` is Claude Code-only — it edits the workbook on your own disk, which Chat and Cowork cannot reach because they run code on Anthropic's servers. Everything else works in Chat and Cowork too, since it all goes through connectors.
 
 ## Skills
 
@@ -47,8 +47,7 @@ a name to work on a colleague's behalf. The rest are ticket-scoped: give them a 
 | `draft-follow-up-email-progress` | Drafts the progress-update email on a case still sitting on our side — where we are, and when the next update lands. |
 | `raise-ms-support-ticket` | Guides you through raising a Microsoft support request in the Power Platform admin center, one short step at a time — reads the live browser, or your screenshots if the Chrome extension is not connected, then writes the Microsoft ticket number into the Tracker ticket's Principal Case # field. |
 | `close-ticket` | Closes a resolved Tracker ticket — sets the status, picks the Root Cause from the dropdown, writes the Resolution in the internal house style, and stamps today as the Resolution Date. The natural next step after `draft-closing-email`. |
-| `weekly-report` | Drafts this week's Customer Success Weekly Report in DAXONET Notes, pulled from the Tracker. |
-| `update-weekly-report` | Refreshes an existing weekly report doc — re-pulls the week, folds in what landed since, tightens the prose. |
+| `update-weekly-report` | Owns the Customer Success Weekly Report in DAXONET Notes for a given week — creates that week's doc if there isn't one, otherwise rewrites the existing one, including any change you ask for by name. |
 | `update-ES-weekly-sheet` | Fills a week's column in the ES Weekly Update team tracker spreadsheet from the Tracker — splits your open issues across the In Progress / In Review / Closed rows and writes the per-ticket Excel cell notes. |
 | `KB-this` | Writes a knowledge base article about a resolved case and publishes it to DAXONET Notes under the customer's KB page, in the house format. |
 
@@ -211,16 +210,15 @@ unanswered customer question, or a case still waiting on Microsoft with the Prin
 
 Requires the Tracker MCP server.
 
-### weekly-report
-
-Pulls the week off the Tracker and writes the Customer Success Weekly Report into DAXONET Notes
-in the house format.
-
 ### update-weekly-report
 
-Refreshes a weekly report that already exists. It rewrites and curates the whole report rather
-than appending bullets to the bottom — re-pulls the week, folds in what landed since, and tightens
-what is already there.
+Owns one week's Customer Success Weekly Report in DAXONET Notes. You never pick between writing and
+updating: if that Friday has no doc it creates one, and if it does it rewrites it.
+
+Updating curates rather than appends — it re-pulls the week, folds in what landed since, and drops
+what the Tracker no longer supports, so sections stay inside the template's counts. Name a week and
+a change ("in the 28 August report, add the Luvata RAF fix") and it edits that report instead of
+starting a new one.
 
 ### update-ES-weekly-sheet
 
