@@ -21,7 +21,7 @@ Sub-second, and it finds the synced folder wherever OneDrive put it — commonly
 
 Two hits to reject:
 
-- **`ES Weekly Update_Customer Success Team.xlsx.url`, ~180 bytes** — a single-file shortcut. It has no content; treat it as not found and delete it once the real folder is synced.
+- **`ES Weekly Update_Customer Success Team.xlsx.url`, ~180 bytes** — someone ran *Add shortcut* on the **file** instead of syncing the **folder**. It has no content; treat it as not found and delete it once the real folder is synced.
 - **A copy in `~/Downloads`** — not usable. It is detached from SharePoint: edits there reach nobody, and it goes stale the moment a colleague saves. If that is all there is, treat it as not found, run the setup below, and tell the user to delete the stray copy so it cannot be picked up later.
 
 ### If it is not on this machine (first run)
@@ -30,15 +30,17 @@ The workbook must be **synced**, so the edit reaches SharePoint through OneDrive
 
 Give exactly this, and nothing more:
 
-> Open this link, then click **Add shortcut to OneDrive** in the toolbar (don't select the file first):
+> Open this link, click the **⋯** at the right of the toolbar, then **Sync**. Say yes to "This site is trying to open Microsoft OneDrive", and close the "We're syncing your files" box.
 > https://daxonet0.sharepoint.com/sites/EnterpriseSolution/Shared%20Documents/Forms/AllItems.aspx?id=%2Fsites%2FEnterpriseSolution%2FShared%20Documents%2FGeneral%2F08%20Resources
 
-Then verify it yourself — re-run the `find` every 10-15 seconds for up to about two minutes, since OneDrive downloads the folder in the background. Announce success as soon as the file appears; do not ask the user whether it worked.
+**Sync**, not *Add shortcut to OneDrive*. Both work, but Sync is what the team actually uses, and it lands the folder in its own root — `~/DAXONET GROUP/Enterprise Solution - 08 Resources/` — whereas a shortcut lands under `~/OneDrive - DAXONET GROUP/`. The `find` catches either, so never re-do a setup that already worked.
+
+Then verify it yourself — re-run the `find` every 10-15 seconds for up to about two minutes, since OneDrive pulls the folder down in the background. Announce success as soon as the file appears; do not ask the user whether it worked.
 
 If it still has not appeared:
 
-- **The button is missing from the toolbar** (only `Alert me` behind `⋯`, or the parent folder shows "Unknown render failure") — they have item-level access to the file but not the library, so no amount of clicking will work. Tell them to ask an Enterprise Solution site owner to add them to the site, then re-run. Do not offer a download as a substitute.
-- **The file is there but 0 bytes / "Available when online"** — Files On-Demand has not hydrated it yet. Reading it triggers the download; just read it and carry on.
+- **`⋯` only offers `Alert me` / `Manage my alerts`** — no Sync, no Add shortcut. They have item-level access to the file but not the library (opening the parent `General` folder confirms it: "Unknown render failure"). No amount of clicking will work. Tell them to ask an Enterprise Solution site owner to add them to the site, then re-run. Do not offer a download as a substitute.
+- **The file is there but shows 0 bytes / "Available when online"** — Files On-Demand has not hydrated it yet. Reading it pulls the content down; just read it and carry on.
 
 ## Roster
 
@@ -183,10 +185,10 @@ An Excel note is not one XML edit. It needs an entry in `xl/comments*.xml`, a ma
 ## Traps
 
 - **The SharePoint connector cannot see cell notes.** `read_resource` returns values and formulas only. Read notes from the local file with `xlsx_notes.py read`. Never conclude "there are no notes" from a connector read.
-- **OneDrive can silently revert your write** (sync route only). Five people edit this workbook. If a colleague saves between your write and the upload, OneDrive cannot merge .xlsx — the server copy wins and your edit vanishes from disk. Symptom: the user opens the file and sees the change, closes it, reopens, and it is gone. Keep the write window short and verify afterwards. The connector route in step 8 avoids this by checking `lastModifiedDateTime` instead.
+- **OneDrive can silently revert your write.** Five people edit this workbook. If a colleague saves between your write and the upload, OneDrive cannot merge .xlsx — the server copy wins and your edit vanishes from disk. Symptom: the user opens the file and sees the change, closes it, reopens, and it is gone. Keep the write window short, and after the tray icon settles re-read the cells you wrote; if they are gone, re-apply the delta to the file as it now stands.
 - **Therefore: always re-copy the live file immediately before editing.** Applying a staged full-file snapshot from earlier in the session overwrites colleagues' work that landed in between. Apply only the delta, on top of whatever is on disk now.
-- **Add shortcut may be missing from the SharePoint toolbar.** With only item-level access the parent folder throws "Unknown render failure" and the folder-level buttons never appear. That is a permissions problem, not a workaround problem: the user needs adding to the Enterprise Solution site. Never substitute a downloaded copy — it is detached from SharePoint, so the edit reaches nobody.
+- **Sync may be missing from the SharePoint toolbar.** With only item-level access, `⋯` offers nothing but `Alert me`, and the parent folder throws "Unknown render failure". That is a permissions problem, not a workaround problem: the user needs adding to the Enterprise Solution site. Never substitute a downloaded copy — it is detached from SharePoint, so the edit reaches nobody.
 
 - **This skill is used by the whole Customer Success team, not just its author.** Never mention another person's machine, username, or home directory, and never paste a `C:\Users\<someone-else>\...` path at the user. Resolve every path from `$USERPROFILE` on the machine you are running on.
 
-- **Keep setup to one action.** Anything a teammate must do by hand is one sentence with one link and one button. No numbered SharePoint UI tours, no "tick this, then expand that". If a check fails, do the fix yourself where you can (officecli) and ask for the single click where you cannot (**Add shortcut to OneDrive**). Then verify it worked rather than asking them to confirm.
+- **Keep setup to one action.** Anything a teammate must do by hand is one sentence with one link and one button. No numbered SharePoint UI tours, no "tick this, then expand that". If a check fails, do the fix yourself where you can (officecli) and ask for the single click where you cannot (`⋯` → **Sync**). Then verify it worked rather than asking them to confirm.
