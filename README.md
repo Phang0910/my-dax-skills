@@ -45,7 +45,7 @@ Only `update-ES-weekly-sheet` is Claude Code-only — it edits the workbook on y
 | `draft-closing-email` | Drafts the final ticket-closure email for a resolved support case, in the DAXONET closure format, with the consultant hours taken from Tracker rather than the template. |
 | `draft-follow-up-email-chaser` | Drafts the chaser email on a case the customer has gone quiet on — picks the 1st/2nd follow-up, the 3rd that warns of closure, or the system-behaviour archive request, recommending the stage from the ticket's journals. |
 | `draft-follow-up-email-progress` | Drafts the progress-update email on a case still sitting on our side — where we are, and when the next update lands. |
-| `raise-ms-support-ticket` | Raises a Microsoft support request in the Power Platform admin center — asks whether you want a ready-to-paste guide pack you work through yourself, or want it driven live in Chrome, then writes the Microsoft ticket number into the Tracker ticket's Principal Case # field. |
+| `raise-ms-support-ticket` | Raises a Microsoft support request in the Power Platform admin center — drafts the description and the answers Microsoft will ask for, gets them approved in one question, then either hands you the pack to file yourself or drives Chrome and submits it, and writes the Microsoft ticket number into the Tracker ticket's Principal Case # field. |
 | `close-ticket` | Closes a resolved Tracker ticket — sets the status, picks the Root Cause from the dropdown, writes the Resolution in the internal house style, and stamps today as the Resolution Date. The natural next step after `draft-closing-email`. |
 | `update-weekly-report` | Owns the Customer Success Weekly Report in DAXONET Notes for a given week — creates that week's doc if there isn't one, otherwise rewrites the existing one, including any change you ask for by name. |
 | `update-ES-weekly-sheet` | Fills a week's column in the ES Weekly Update team tracker spreadsheet from the Tracker — splits your open issues across the In Progress / In Review / Closed rows and writes the per-ticket Excel cell notes. |
@@ -160,32 +160,38 @@ Requires the Tracker MCP server.
 Files a Microsoft support request without you having to hold the whole case in your head in front
 of a form that times out.
 
-**It asks you one question first: do you want the guide, or do you want it driven?**
+**It drafts first and asks once.** Before anything opens, you get the pack: the portal URL, the
+description block ready to paste, and the questions Microsoft is going to ask with the recommended
+answer for each — Power Platform Administration, Technical, Severity B, grant diagnostic consent —
+the reason in a clause rather than a paragraph. Headed *likely asks, not a script*, because the
+Support agent pane makes up clarifying questions per case.
 
-**Path A — "Give me the guide, I'll do it."** One message, then it gets out of the way: the portal
-URL, the description block ready to paste, and the questions Microsoft is going to ask with the
-recommended answer for each — Power Platform Administration, Technical, Severity B, grant
-diagnostic consent — the reason in a clause rather than a paragraph. Headed *likely asks, not a
-script*, because the Support agent pane makes up clarifying questions per case. You work through
-the portal at your own pace with no round-trip per click, and paste or screenshot anything that
-does not match. This is the faster path when you know the wizard.
+Then one question, which approves the content and picks the path in the same click:
 
-**Path B — "Drive it with me in Chrome."** It reads the live page and fills the form as you go,
-one screenful per step, so a validation error does not put the two of you out of sync. If the
-**Claude in Chrome** extension is not connected it sets up what it can itself and hands you only
-what is physically yours — one link, two clicks — then detects the connection rather than asking
-whether you have done it yet. Setup is one-time, about thirty seconds. If it still does not come
-up, it drops you to Path A instead of looping.
+**Path A — "Looks right, give me the guide."** It gets out of the way. You work through the portal
+at your own pace with no round-trip per click, and paste or screenshot anything that does not
+match. The faster path when you already know the wizard.
 
-Either way it never asks you to describe what happened in words; a screenshot is the page, your
-description is not. Material comes from the conversation you are already in plus the Tracker
-ticket, and anything it cannot find is left **blank**. No questionnaire beyond that first question.
+**Path B — "Looks right, you drive it and submit."** It fills the form and clicks **Create support
+request** itself. If the **Claude in Chrome** extension is not connected it sets up what it can
+and hands you only what is physically yours — one link, two clicks — then detects the connection
+rather than asking whether you have done it yet. Setup is one-time, about thirty seconds; if it
+still does not come up, it drops you to Path A instead of looping.
 
-**It never signs in and it never clicks Create support request** — in either path. Judgement calls
-are shown to you before they are entered, never chosen silently. Afterwards it takes the ticket
-number, shows it to you, and on your confirmation writes it to the Tracker ticket's Principal
-Case # field (`cf 43`), the only field it touches. Then it stops; chasing Microsoft's reply is the
-email skills' job.
+**In Path B the approval is the whole gate**, since nobody sees the form before Microsoft does.
+So one rule carries it: anything the portal asks that the approved pack does not answer **stops
+the flow** — it shows you the question and waits, rather than deciding on your behalf. After
+submitting it reports what actually went in, and flags any value that differs from what you
+approved.
+
+It never asks you to describe what happened in words; a screenshot is the page, your description
+is not. **It never signs in** — that is always you. Material comes from the conversation you are
+already in plus the Tracker ticket, and anything it cannot find is left **blank**. No
+questionnaire.
+
+Afterwards it takes the ticket number, shows it to you, and on your confirmation writes it to the
+Tracker ticket's Principal Case # field (`cf 43`), the only field it touches. Then it stops;
+chasing Microsoft's reply is the email skills' job.
 
 Always PPAC, never Lifecycle Services. Needs the Tracker MCP; the `claude-in-chrome` extension is
 Path B only.

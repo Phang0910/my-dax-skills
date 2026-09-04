@@ -1,6 +1,6 @@
 ---
 name: raise-ms-support-ticket
-description: Raise a Microsoft support request in the Power Platform admin center — either by handing the user a ready-to-paste guide pack they work through themselves, or by driving Chrome end to end with them — then write the resulting Microsoft ticket number into the Tracker ticket's Principal Case # field. Use when the user asks to raise, file, log or open a ticket with Microsoft on a D365FO / Power Platform issue.
+description: Raise a Microsoft support request in the Power Platform admin center — draft the description and the answers to Microsoft's questions, get them approved in one pass, then either hand the user a guide pack to file it themselves or drive Chrome and submit it for them — and write the resulting Microsoft ticket number into the Tracker ticket's Principal Case # field. Use when the user asks to raise, file, log or open a ticket with Microsoft on a D365FO / Power Platform issue.
 argument-hint: "[ticket no]"
 ---
 
@@ -8,18 +8,22 @@ argument-hint: "[ticket no]"
 
 Get a Microsoft support request filed against a Tracker case, and link the two.
 
-**Two ways to run it.** The user picks at Step 0:
+**The pack comes first, then one question.** You draft the description and the answers Microsoft
+will ask for, show them, and ask a single question that approves the content *and* picks the path:
 
-| | **Path A — Guide pack** | **Path B — End-to-end in Chrome** |
+| | **Path A — Guide pack** | **Path B — Driven in Chrome** |
 |---|---|---|
-| Who drives | The user, at their own pace | You, in their browser |
-| You send | One pack: URL, description block, likely questions with recommended answers | Live navigation and field entry |
-| User sends back | A screenshot or paste only if something is off-script | Nothing until the Create click |
+| Who files it | The user, at their own pace | You |
+| After approval you send | Nothing more — they have the pack | Live progress, one screenful per step |
+| User sends back | A screenshot or paste only if something is off-script | Nothing, unless the portal asks something the pack did not cover |
+| Who submits | The user clicks Create | **You click Create** |
 | Setup | None | One-time extension install, ~30s |
 
-**Absolute in both paths: you never click "Create support request".** The user clicks it. Same
-principle as `draft-email` never sending — the request goes to Microsoft under their name, on a
-real customer case, and they review the whole form before it leaves.
+**The approval is the gate.** In Path B nobody reviews the form before it reaches Microsoft, so the
+pack the user approved is the whole of their review. That makes one rule load-bearing: **if the
+portal asks something the approved pack does not answer, stop and ask.** Never improvise past the
+approval — a request filed under the user's name on a real customer case is not reversible by
+editing the form.
 
 **Done when** the support request exists and its number is in the Tracker ticket's
 **Principal Case #** field. Tracking Microsoft's replies, chasing, escalating, or posting their
@@ -30,19 +34,20 @@ answers back to Tracker is *not* this skill — that is the normal email and Tra
 ## Hard rules
 
 1. **Never ask for, receive, or type credentials.** The user signs in. You wait and read the page.
-2. **Never click "Create support request".** Both paths. That final action is the user's.
-3. **Judgement answers are shown, never chosen silently.** Product, request type, severity,
-   diagnostic consent, and anything the Support agent pane asks that turns on the user's
-   judgement — give a *recommended answer* for them to read, edit and accept.
-   - *Path A:* in a code block, for them to paste.
-   - *Path B:* state the value and the one-line reason, then enter it. Derived facts you parsed
-     yourself — environment ID, error text, correlation ID — you enter without asking.
+2. **Create is clicked only against an approved pack.** *Path A:* the user clicks it. *Path B:*
+   you click it, but only once the pack has been approved at Step 0 and only if every answer you
+   entered came from that pack. No approval, no submit.
+3. **Anything the approved pack does not answer stops the flow.** A clarifying question from the
+   Support agent pane, a field you did not anticipate, a value that turns on the user's judgement
+   — stop, show it, recommend an answer, wait. This is the rule that keeps Path B honest; without
+   it "the user approved the pack" quietly becomes "the user approved whatever I decided".
+   Derived facts you parsed yourself — environment ID, verbatim error text, correlation ID — are
+   already in the pack and need no second approval.
 4. **The page is the source of truth, never the user's description.** *Path B and the Path A
-   screenshot fallback:* end each step with "tell me when that's done" and treat their next
-   message — whatever it says — purely as the cue to read the page. The browser tools are
-   pull-only, so the cue is only for *timing*; the *state* always comes from the page. A
-   validation error after Next is the common desync, and only the page reveals it. A
-   **screenshot** is the page; the user's description of it is not.
+   screenshot fallback:* treat the user's next message — whatever it says — purely as the cue to
+   read the page. The browser tools are pull-only, so the cue is only for *timing*; the *state*
+   always comes from the page. A validation error after Next is the common desync, and only the
+   page reveals it. A **screenshot** is the page; the user's description of it is not.
 5. **Do not check role or support-plan prerequisites.** Invoking the skill means the user has
    already confirmed them. Do not re-litigate.
 6. **Never trigger browser dialogs** (alert / confirm / prompt) — they block the extension.
@@ -50,37 +55,29 @@ answers back to Tracker is *not* this skill — that is the normal email and Tra
    Path B setup poll.
 8. **Write no files.** Everything goes to chat as markdown. No scratch files, no saved pack, no
    logs. The only thing written anywhere is the one Tracker field update at the end.
-9. **One question, then work.** The Step 0 path question is the *only* thing you may ask before
-   producing something. Beyond it: no questionnaire, no field-by-field prompting. Derive what you
-   can; leave what you cannot **blank** and move on. A blank the user fills in ten seconds beats
-   five questions they answer before anything happens. Same for recommended answers — if the
-   basis for one is not there, leave it blank rather than inventing it.
-10. **Path B: one screenful per step.** The instruction, one line of why, the text to paste.
-    No case recaps, no previews of later steps, no re-justifying a decision already taken.
-    **This does not apply to the Path A pack**, which is deliberately one larger message.
+9. **Produce first, then ask once.** Build the pack before you ask anything. The Step 0
+   approve-and-choose question is the *only* question you may put to the user before work starts
+   — no questionnaire, no field-by-field prompting. Derive what you can; leave what you cannot
+   **blank** and move on. A blank the user fills in ten seconds beats five questions they answer
+   before anything happens. Same for recommended answers — if the basis for one is not there,
+   leave it blank rather than inventing it.
+10. **Path B: one screenful per step.** The action, one line of why. No case recaps, no previews
+    of later steps, no re-justifying a decision already approved. **This does not apply to the
+    Step 0 pack**, which is deliberately one larger message.
 
 ---
 
-## Step 0 — Resolve the ticket, then ask which path
+## Step 0 — Resolve the ticket, build the pack, ask once
 
 Resolve the Tracker ticket (ask only if it was not given; read it back by subject in one line to
-confirm). Then ask the path question with `AskUserQuestion` — **one** question, two options, in
-this order:
+confirm). Then **build the pack and show it** — before any question, before opening any browser.
 
-- **"Give me the guide, I'll do it"** — you get the URL, a ready-to-paste description, and the
-  answers to the questions Microsoft will ask. You work through the portal at your own pace.
-- **"Drive it with me in Chrome"** — I read the page and fill the form as we go; you click the
-  final Create. One-time extension setup, about 30 seconds.
-
-Do **not** pre-check whether the extension is connected before asking. If they pick Path B and it
-is not connected, Step B0 handles it.
-
-Do not print an evidence pack, a description block, an attachment list, or a case summary
-*before* the question. The user filing the ticket already knows the case.
+This is the one place the "no wall of text" instinct is deliberately off. The pack is new
+information the user cannot produce themselves, and in Path B it is the only review they get.
 
 ### Where the material comes from
 
-Build every piece of text from these, in order, without interviewing the user:
+Build every piece of it from these, in order, without interviewing the user:
 
 | Source | What it yields |
 |---|---|
@@ -91,27 +88,15 @@ Build every piece of text from these, in order, without interviewing the user:
 
 Anything you cannot find is left **blank** for the user to fill. Never ask for it up front.
 
-**Always the Power Platform admin center.** Lifecycle Services is out of scope: do not route to
-it, do not mention it, do not build a walkthrough for it.
+### The pack
 
----
-
-## Path A — The guide pack
-
-**One message, then get out of the way.** Everything the user needs to file the request alone.
-
-This is the one place the "no wall of text" instinct is deliberately off. The pack is new
-information the user cannot produce themselves — not a recap of what they already told you.
-
-The pack, in this order:
-
-### 1. The URL
+#### 1. The URL
 
 ```
 https://admin.powerplatform.microsoft.com/support/requests
 ```
 
-### 2. The description block
+#### 2. The description block
 
 A fenced code block, the text only, ready to paste. Include the verbatim error, the environment
 and account IDs, the correlation ID / timestamp / client machine name Microsoft's FAQ requires,
@@ -119,9 +104,9 @@ the evidence ruling out a local cause, the Learn link, and numbered questions.
 
 `reference/example-19119.md` is a fully worked one — read it for the shape, not the contents.
 
-Say nothing about it beyond "paste this into the description field". Do not narrate what is in it.
+Say nothing about it beyond what it is. Do not narrate what is in it.
 
-### 3. Likely asks, and how to answer
+#### 3. Likely asks, and how to answer
 
 Head this section **"Likely asks — not a script."** The Support agent pane generates clarifying
 questions per case and Microsoft reshuffles the wizard, so some of this will not match. Say that
@@ -134,7 +119,7 @@ The fixed choices, each with its one-line reason:
 | Product | **Power Platform Administration**, for a Dataverse issue on a Power Platform-managed environment | Wrong product means misrouting and days lost |
 | Request type | **Technical** | Advisory gets a genuine fault closed rather than fixed |
 | Severity | **B**, or C | A commits you to round-the-clock engagement and is auto-downgraded if you cannot |
-| Affected environment | Pick it from the list; if absent, **"My environment is not listed"** and paste the URL | — |
+| Affected environment | Pick it from the list; if absent, **"My environment is not listed"** and paste the URL |  |
 | Diagnostic consent | **Grant** | Without it Microsoft cannot look, and comes back to ask — a day gone |
 
 Then the case-specific ones you can anticipate — the predicted-product confirmation, the
@@ -143,15 +128,37 @@ recommended answer in a code block wherever it is text to paste.
 
 Fit these to the case in front of you. Give the reason once, in one clause.
 
-### 4. Attachments
+#### 4. Attachments
 
 One line, and only if relevant: not required to create the request, Microsoft's first reply
 usually asks, and anything unobtainable should be stated in the ticket rather than stalling
 the filing.
 
-### 5. The close
+### The question
 
-Two instructions, no more:
+**One** `AskUserQuestion`, two options. Both encode approval; a correction arrives through the
+auto-added *Other*, so do not add a "something's wrong" option of your own and do not split this
+into two questions.
+
+- **"Looks right — give me the guide, I'll file it"** — you keep the pack and work through the
+  portal at your own pace.
+- **"Looks right — you drive it in Chrome and submit"** — I fill the form and click Create.
+  One-time extension setup, about 30 seconds.
+
+Do **not** pre-check whether the extension is connected before asking. If they pick Path B and it
+is not connected, Step B0 handles it.
+
+If they come back with a correction instead, fix the pack, show the changed part only, and ask
+again — not the whole pack a second time.
+
+**Always the Power Platform admin center.** Lifecycle Services is out of scope: do not route to
+it, do not mention it, do not build a walkthrough for it.
+
+---
+
+## Path A — They file it
+
+The pack is already sent. Add two instructions, no more:
 
 > Anything that doesn't match the above — a question not on this list, a validation error, a
 > screen that looks wrong — screenshot it or paste it here and I'll answer it.
@@ -171,7 +178,7 @@ describe it. If they clearly want you to take over from there, switch to Path B.
 
 ---
 
-## Path B — End to end in Chrome
+## Path B — You file it
 
 ### Step B0 — Setup, done by you wherever it can be
 
@@ -217,22 +224,22 @@ Read the page yourself after each step. Do not ask for screenshots.
 Tell the user to sign in. Do not touch it. Then confirm from the page that they landed on
 **Support requests**.
 
-### Step B3..N — The guided loop
+### Step B3..N — Fill the form
 
 Per step: **the action, then the reason in one short line.** That is the whole shape.
 
 1. What you are entering or clicking — one action per numbered line.
 2. Why, in **one sentence at most**, and only where the choice is not obvious. Skip it entirely
    for a plain "clicking Next".
-3. Judgement answers per rule 3: state the value and the one-line reason before entering it.
-4. Read the page and work out the real state from it.
-5. If it does not match what the step expected, say so and correct rather than advancing.
-
-Where the portal reaches the **description field**, produce the block then — same content as the
-Path A pack's block. Enter it, and say nothing beyond that you have.
+3. Enter the approved answer. It came from the pack; do not re-justify it.
+4. **Rule 3 check:** if the portal asks something the pack does not answer, stop, show it,
+   recommend an answer, and wait. Do not answer it yourself.
+5. Read the page and work out the real state from it.
+6. If it does not match what the step expected, say so and correct rather than advancing.
 
 **Keep it short.** One screenful per step. The user is watching a live form that can time out, on
-a phone-sized terminal pane. Do not restate the case, do not re-explain a decision already made.
+a phone-sized terminal pane. Do not restate the case, do not re-explain a decision already
+approved.
 
 Wrong:
 
@@ -257,15 +264,20 @@ be handled. The stages, roughly:
 6. **Technical** vs Advisory · support plan · **severity** · date the issue occurred
 7. Affected environment — if it is not listed, "My environment is not listed" and paste the URL
 8. Contact preferences and **advanced diagnostic consent**
-9. **The user clicks Create support request** — you stop here and hand over
+9. **Create support request** — you click it, against the approved pack
 
 This list is for you, not for the user. Do not print it as a preview of what is coming — take the
 stages one at a time as the portal reaches them.
 
-### Step B-final — Hand over the Create click
+### Step B-final — Submit, then report what went in
 
-The form is complete. Tell the user in one line to review it and click **Create support request**
-themselves. Do not click it. Do not offer to.
+Click **Create support request**. Then, in one short block, tell the user what was actually
+submitted: product, request type, severity, environment, diagnostic consent. They approved a
+prediction of the form; they should see the form that existed.
+
+If anything went in differently from the approved pack — the portal forced a value, a field was
+not offered — say which, plainly. Do not let a divergence pass silently just because the request
+succeeded.
 
 ---
 
