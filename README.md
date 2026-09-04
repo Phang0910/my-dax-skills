@@ -103,7 +103,7 @@ Requires the Tracker MCP server.
 Writes the final closure email for a resolved case, in the format actually in use: the detail
 block (`Support Case ID`, `Reported By`, `Consultant Assigned`, `Summary of Resolution`,
 `Consultant Hours`) as one compact run with no blank lines, first names only, signed off
-`Best Regards, Jun Phang`.
+`Best Regards,` plus your own first name.
 
 Two things it does that save a round trip. It reads `spent_hours` off the Tracker ticket instead
 of trusting the placeholder figure that circulating copies of the template carry, and it keeps
