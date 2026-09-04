@@ -152,7 +152,7 @@ real trade-offs, not being sold the one you prefer:
 | Label | Description |
 |---|---|
 | **Give me the guide, I'll proceed myself** | No setup and you see every screen before it happens — you do the clicking, but paste me anything that blocks you and I'll answer it. |
-| **You drive it in Chrome end to end** | Hands-off — I fill it in, submit, and write the case number to Tracker without needing anything further from you. *(setup clause — see below)* |
+| **You drive it in Chrome end to end** | Hands-off — I fill it in, submit, and write the case number to Tracker. You just sign in to the portal. *(setup clause — see below)* |
 
 Neither is "recommended". They suit different moments: the first if you know the wizard or want
 to read every screen, the second if you would rather not touch it.
@@ -161,13 +161,17 @@ to read every screen, the second if you would rather not touch it.
 tools and call `tabs_context_mcp` (Step B0 has the `ToolSearch` line). Do not hardcode a setup
 cost the user may not owe:
 
-- **Connected** → *"Hands-off — I fill it in, submit, and write the case number to Tracker without
-  needing anything further from you. Chrome's already connected, so there's no setup."*
-- **Not connected** → append *"...but it needs a one-time extension install first, about 30
-  seconds."*
+- **Connected** → *"Hands-off — I fill it in, submit, and write the case number to Tracker. You
+  just sign in to the portal; Chrome is already connected, so there's no other setup."*
+- **Not connected** → *"...you just sign in to the portal, plus a one-time extension install
+  first, about 30 seconds."*
 
 Run this check silently. Say nothing about it unless they pick option 2 and setup is actually
 needed.
+
+**Never write "nothing further from you" or any equivalent.** Rule 1 makes sign-in the user's,
+always, and `tabs_context_mcp` returning tabs proves the extension is connected — not that a PPAC
+session is live. Path B always costs them the sign-in, so the option must say so.
 
 If they come back with a correction instead, fix the pack, show the changed part only, and ask
 again — not the whole pack a second time.
@@ -291,15 +295,19 @@ be handled. The stages, roughly:
 This list is for you, not for the user. Do not print it as a preview of what is coming — take the
 stages one at a time as the portal reaches them.
 
-### Step B-final — Submit, then report what went in
+### Step B-final — Submit, then close out in one block
 
-Click **Create support request**. Then, in one short block, tell the user what was actually
-submitted: product, request type, severity, environment, diagnostic consent. They approved a
-prediction of the form; they should see the form that existed.
+Click **Create support request**, read the case number, write it to Tracker (Steps N+1 and N+2),
+and report the lot **once**:
 
-If anything went in differently from the approved pack — the portal forced a value, a field was
-not offered — say which, plainly. Do not let a divergence pass silently just because the request
-succeeded.
+- What actually went in — product, request type, severity, environment, diagnostic consent. They
+  approved a prediction of the form; they should see the form that existed.
+- Anything that went in differently from the approved pack — the portal forced a value, a field
+  was not offered. Say which, plainly. Do not let a divergence pass silently just because the
+  request succeeded.
+- The case number, and that `cf 43` is set.
+
+One block, per rule 10 — not three consecutive reports as you finish each step.
 
 ---
 

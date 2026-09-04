@@ -176,9 +176,8 @@ way and lets you work at your own pace with no round-trip per click. The better 
 already know the wizard.
 
 **"You drive it in Chrome end to end."** Hands-off — it fills the form in, submits, and writes the
-case number to Tracker without needing anything further from you. It checks whether **Claude in
-Chrome** is already connected *before* offering this, so it never quotes you a setup cost you do
-not owe. If it is not connected it sets up what it can and hands you only what is physically
+case number to Tracker; you just sign in to the portal. It checks whether **Claude in Chrome** is
+already connected *before* offering this, so it never quotes you a setup cost you do not owe. If it is not connected it sets up what it can and hands you only what is physically
 yours — one link, two clicks — then detects the connection rather than asking whether you have
 done it yet. If it still does not come up, it drops you to the guide instead of looping.
 
