@@ -9,11 +9,35 @@ Update one week's column on one person's sheet in **ES Weekly Update_Customer Su
 
 **Always ask who the sheet is for** — never assume. Default week is the one containing today.
 
-## The file
+## Finding the file
 
-`C:\Users\jp.gan\DAXONET GROUP\Enterprise Solution - 08 Resources\ES Weekly Update_Customer Success Team.xlsx`
+The workbook lives in SharePoint at `/sites/EnterpriseSolution/Shared Documents/General/08 Resources/`. **Never hardcode a local path** — every teammate has a different username, and sync roots differ. Locate it:
 
-A SharePoint team-site sync from `/sites/EnterpriseSolution/Shared Documents/General/08 Resources/`. Team-site syncs land under `C:\Users\jp.gan\DAXONET GROUP\`, **not** under `OneDrive - DAXONET GROUP\`.
+```bash
+find "$USERPROFILE" -maxdepth 4 -name "ES Weekly Update_Customer Success Team.xlsx" -not -name '~$*' 2>/dev/null
+```
+
+Sub-second, and it finds the file wherever it sits — a synced team-site folder (`~/DAXONET GROUP/...`, *not* `~/OneDrive - DAXONET GROUP/`), a OneDrive shortcut, or plain `~/Downloads`.
+
+Two things follow from **where** it was found, and they decide how step 8 writes back:
+
+| Found in | Write back by |
+|---|---|
+| a synced folder (path contains `DAXONET GROUP` or `OneDrive`) | `cp` — OneDrive uploads it |
+| `Downloads`, or anywhere unsynced | `sharepoint_update_file` (see step 8) |
+
+Ignore any `.xlsx.url` hit of ~180 bytes: that is a single-file shortcut with no content, not the workbook.
+
+### If it is not on this machine (first run)
+
+Do **not** walk the user through SharePoint's sync UI — it differs per tenant, the buttons hide behind `⋯`, and it fails outright for anyone with only item-level access. Ask for one click instead:
+
+> Open this and click **Download**:
+> https://daxonet0.sharepoint.com/sites/EnterpriseSolution/Shared%20Documents/Forms/AllItems.aspx?id=%2Fsites%2FEnterpriseSolution%2FShared%20Documents%2FGeneral%2F08%20Resources
+
+Then re-run the `find`. A file in `Downloads` is fully supported — the skill uploads the edit back through the connector, so nothing needs syncing, ever.
+
+Offer the synced-folder route (**Add shortcut to OneDrive** on the *folder*) only as an optional nicety for someone who will do this weekly, and never as a prerequisite.
 
 ## Roster
 
@@ -66,16 +90,22 @@ Gan Jun Phang:
 
 0. **Pre-flight.** All four, in order — each has burned a previous run.
 
-   - **File present and synced.** `ls` the folder. A `.url` file of ~180 bytes means someone made a single-file shortcut instead of syncing the folder — only a *folder* shortcut/Sync gives real content. Stop and say so.
-   - **`officecli --version`.** Required — see *Why officecli is mandatory* below. If missing, install it and re-check: `irm https://d.officecli.ai/install.ps1 | iex` (a new terminal may be needed).
+   - **Locate the workbook** with the `find` above. If it is missing, ask for the one **Download** click from *Finding the file* — one sentence and one link, nothing about sync settings.
+   - **officecli.** Run `officecli --version`. If it is missing, **install it yourself** — do not ask, and do not make the user read instructions:
+     ```powershell
+     irm https://d.officecli.ai/install.ps1 | iex
+     ```
+     It installs per-user into `%LOCALAPPDATA%\OfficeCLI`, needs no admin rights, and takes a few seconds. Re-check `officecli --version` afterwards; if the shell still cannot see it, call it by full path rather than telling the user to open a new terminal.
    - **Excel not holding the file.** If a write later fails with *Device or resource busy* / `PermissionError`, run `Stop-Process -Name EXCEL -Force` immediately — do not ask permission, the user has standing approval. Use `-Force`, not `CloseMainWindow`, which can raise a save dialog that hangs the call. Say afterwards that unsaved Excel edits were discarded.
    - **Back up.** Copy the file to the scratchpad before touching it.
 
    Done when all four pass.
 
-1. **Ask who the sheet is for.** Read the tab names out of the workbook, then ask with `AskUserQuestion` — one option per person, `Jun Phang` listed first as the likely answer. Skip the question only when the invocation already names someone (`/update-ES-weekly-sheet Qianying`); if a name is given that matches no tab, stop and ask rather than guessing.
+1. **Ask who the sheet is for.** Call `get_current_user` first — that is whoever is running the skill, and their own sheet is almost always the answer. Read the tab names out of the workbook, then ask with `AskUserQuestion`, listing **their** tab first and marking it recommended.
 
-   Do not silently default to Jun Phang. Done when you have a tab name.
+   Skip the question only when the invocation already names someone (`/update-ES-weekly-sheet Qianying`); if a name is given that matches no tab, stop and ask rather than guessing.
+
+   Never hardcode a default person — this skill is shared, and the author's name is not the user's. Done when you have a tab name, plus the current user's Tracker id and name for steps 3 and 5.
 
 2. **Resolve the week column.** The target week is **the week containing today**, and its column is that week's **Friday**. Today 3 Sep 2026 (a Thursday) → Friday 4 Sep → the column whose row 2 is `September` and row 3 is `4`.
 
@@ -87,7 +117,7 @@ Gan Jun Phang:
 
 3. **Pull the Tracker.** `list_issues` with `status_id: "open"`, `sort: "updated_on:desc"`, and the assignee resolved as follows:
 
-   - The invoker's own sheet (`Jun Phang`, id **194**) → `assigned_to_id: "me"`.
+   - The sheet belongs to the current user (step 1's `get_current_user`) → `assigned_to_id: "me"`.
    - Anyone else → their **numeric id**. `"me"` silently reports on whoever owns the API token, so on a colleague's sheet it would fill their column with the invoker's tickets.
 
    `list_users` needs admin and will fail, so resolve a colleague's id from issue data instead: `list_issues` with `status_id: "*"` and a project they work on, then read `assigned_to.id` off the issue whose `assigned_to.name` matches. State the id you resolved before using it.
@@ -139,7 +169,21 @@ Gan Jun Phang:
 
    Also confirm the other four people's sheets still hold their data (spot-check their row 6). Done when formulas match and only your notes were added.
 
-8. **Copy over, then hand off.** `cp` the fixed copy onto the real path. Tell the user to **wait for the OneDrive tray icon to go green before opening Excel**, then confirm the cells. Opening mid-sync gives a "no access" error and invites the conflict in *Traps*.
+8. **Write back.** Which route depends on where step 0 found the file.
+
+   **Synced folder** — `cp` the fixed copy onto that path. Then tell the user to **wait for the OneDrive tray icon to go green before opening Excel**; opening mid-sync gives a "no access" error and invites the revert in *Traps*.
+
+   **Downloads / unsynced** — push it through the connector, with a concurrency guard, because a blind overwrite would erase whatever a colleague saved while you worked:
+
+   1. `sharepoint_search` for the file at the *start* of the run and keep its `driveId`, `id` and `lastModifiedDateTime`.
+   2. Re-run that search now. If `lastModifiedDateTime` moved, **stop** — a colleague saved in the meantime. Re-acquire the file and reapply the delta; never upload over their change.
+   3. `sharepoint_update_file` with `driveId`, `itemId`, and the workbook as `contentBase64` (strict unbroken base64, no newlines). Pass `expectedBytes` only if you computed the byte length in the same step that produced the base64.
+
+   The library keeps version history, so a bad write is recoverable — but the timestamp check is what stops it happening.
+
+   Note the base64 payload is large (a ~55 KB workbook costs roughly 20k tokens). That is the price of needing no setup; prefer a synced copy for someone who runs this weekly.
+
+   Either way, finish by telling the user the exact cells and notes written, so they can eyeball one and stop.
 
 ## Why officecli is mandatory
 
@@ -148,6 +192,10 @@ An Excel note is not one XML edit. It needs an entry in `xl/comments*.xml`, a ma
 ## Traps
 
 - **The SharePoint connector cannot see cell notes.** `read_resource` returns values and formulas only. Read notes from the local file with `xlsx_notes.py read`. Never conclude "there are no notes" from a connector read.
-- **OneDrive can silently revert your write.** Five people edit this workbook. If a colleague saves between your write and the upload, OneDrive cannot merge .xlsx — the server copy wins and your edit vanishes from disk. Symptom: the user opens the file and sees the change, closes it, reopens, and it is gone. Mitigate by keeping the write window short and verifying afterwards.
+- **OneDrive can silently revert your write** (sync route only). Five people edit this workbook. If a colleague saves between your write and the upload, OneDrive cannot merge .xlsx — the server copy wins and your edit vanishes from disk. Symptom: the user opens the file and sees the change, closes it, reopens, and it is gone. Keep the write window short and verify afterwards. The connector route in step 8 avoids this by checking `lastModifiedDateTime` instead.
 - **Therefore: always re-copy the live file immediately before editing.** Applying a staged full-file snapshot from earlier in the session overwrites colleagues' work that landed in between. Apply only the delta, on top of whatever is on disk now.
-- **Sync / Add-shortcut may be missing from the SharePoint toolbar.** If the user only has item-level access to the file, the parent folder throws "Unknown render failure" and the folder-level buttons never appear. They need library access first; downloading is the only fallback.
+- **Sync / Add-shortcut may be missing from the SharePoint toolbar.** With only item-level access the parent folder throws "Unknown render failure" and the folder-level buttons never appear. This is why sync is never a prerequisite — go straight to **Download**.
+
+- **This skill is used by the whole Customer Success team, not just its author.** Never mention another person's machine, username, or home directory, and never paste a `C:\Users\<someone-else>\...` path at the user. Resolve every path from `$USERPROFILE` on the machine you are running on.
+
+- **Keep setup to one action.** Anything a teammate must do by hand is one sentence with one link and one button. No numbered SharePoint UI tours, no "tick this, then expand that". If a check fails, do the fix yourself where you can (officecli) and ask for the single click where you cannot (Download). Then verify it worked rather than asking them to confirm.
