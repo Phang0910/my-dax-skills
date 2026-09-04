@@ -175,7 +175,7 @@ upside, because neither is the right answer every time:
 way and lets you work at your own pace with no round-trip per click. The better path when you
 already know the wizard.
 
-**"I fully drive it end to end."** Hands-off — it fills the form in, submits, and writes the
+**"You fully drive it for me end to end."** Hands-off — it fills the form in, submits, and writes the
 case number to Tracker; you just sign in to the portal. It checks whether **Claude in Chrome** is
 already connected *before* offering this, so it never quotes you a setup cost you do not owe. If it is not connected it sets up what it can and hands you only what is physically
 yours — one link, two clicks — then detects the connection rather than asking whether you have
