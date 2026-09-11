@@ -219,9 +219,24 @@ Gan Jun Phang:
 
    Also confirm the other four people's sheets still hold their data (spot-check their row 6). Done when formulas match and only your notes were added.
 
-8. **Write back and hand off.** `cp` the fixed copy onto the synced path — OneDrive uploads it from there.
+8. **Write back, then wait for the upload yourself.** `cp` the fixed copy onto the synced path — OneDrive uploads it from there.
 
-   Then tell the user to **wait for the OneDrive tray icon to go green before opening Excel**. Opening mid-sync gives a "no access" error and invites the revert in *Traps*.
+   **Do not hand off yet.** Replacing the whole file makes OneDrive queue a full re-upload, which has taken as long as 18 minutes. If the user opens Excel inside that window they get a **read-only** workbook that never recovers (see *Traps*). Telling them to "watch for the green tray icon" is not enough — they open it anyway, and it is your race to close, not theirs.
+
+   Note the local file's mtime right after the `cp` and hold on to it — that is your write time. Do not re-stat it while polling; OneDrive touches the local file during sync.
+
+   Then poll the server copy until it carries your write, re-checking every 20-30 seconds for up to about five minutes. Load the tool first — it is not available by default:
+
+   ```
+   ToolSearch("select:mcp__claude_ai_Microsoft_365__sharepoint_search")
+   sharepoint_search "ES Weekly Update_Customer Success Team", fileType xlsx
+   ```
+
+   This reads the file's **metadata only** — `lastModifiedDateTime`, in UTC. That is not the connector limitation in *Traps*: the connector cannot see cell *content* or notes, but its timestamps are reliable. Once the server timestamp is at or past your write time, the upload has landed. Then re-read the cells and notes you wrote from the local file — that is the revert check in *Traps* — and only now tell the user it is safe to open.
+
+   If it has not landed after five minutes, say so plainly and tell them not to open the file yet, rather than handing off a file that will open read-only.
+
+   **No M365 connector attached?** Fall back to telling the user to wait for the OneDrive tray icon to go green before opening Excel, and warn them that opening early yields a read-only window they will have to close and reopen. Do not treat a missing connector as a blocker.
 
    Finish by listing the exact cells and notes written, so they can eyeball one and stop.
 
@@ -233,6 +248,7 @@ An Excel note is not one XML edit. It needs an entry in `xl/comments*.xml`, a ma
 
 - **The SharePoint connector cannot see cell notes.** `read_resource` returns values and formulas only. Read notes from the local file with `xlsx_notes.py read`. Never conclude "there are no notes" from a connector read.
 - **OneDrive can silently revert your write.** Five people edit this workbook. If a colleague saves between your write and the upload, OneDrive cannot merge .xlsx — the server copy wins and your edit vanishes from disk. Symptom: the user opens the file and sees the change, closes it, reopens, and it is gone. Keep the write window short, and after the tray icon settles re-read the cells you wrote; if they are gone, re-apply the delta to the file as it now stands.
+- **Excel opens read-only if the upload is still in flight — and stays that way.** Symptom: the title bar reads `- Read-Only -` and the user cannot save. Office decides read-only when it opens an upload-pending synced file and latches that at open time; it never re-checks, so the window is still read-only long after sync finishes. Nothing is damaged and nothing is lost. Confirm it is this and not something worse: **no `~$` owner file** in the folder (Excel only creates one when opening for edit) and **no `fileSharing` / `workbookProtection`** in `xl/workbook.xml`. Then kill EXCEL, verify your cells and notes are still on disk, and tell them to reopen. Step 8 exists to stop this happening at all.
 - **Therefore: always re-copy the live file immediately before editing.** Applying a staged full-file snapshot from earlier in the session overwrites colleagues' work that landed in between. Apply only the delta, on top of whatever is on disk now.
 - **Sync may be missing from the SharePoint toolbar.** With only item-level access, `⋯` offers nothing but `Alert me`, and the parent folder throws "Unknown render failure". That is a permissions problem, not a workaround problem: the user needs adding to the Enterprise Solution site. Never substitute a downloaded copy — it is detached from SharePoint, so the edit reaches nobody.
 
