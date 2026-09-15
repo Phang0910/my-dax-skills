@@ -1,6 +1,6 @@
 ---
 name: update-ES-weekly-sheet
-description: Fill a week's column in the ES Weekly Update team tracker (.xlsx) from the Tracker — split open issues across the status rows and write the per-ticket cell notes. Claude Code only; it edits the workbook on the user's own machine.
+description: Fill a week's column in the ES Weekly Update team tracker (.xlsx) from the Tracker — split open issues across the status rows, balance the column's tally, and write the per-ticket cell notes. Claude Code only; it edits the workbook on the user's own machine.
 argument-hint: "[person] [week-ending date, e.g. 11 September 2026]"
 disable-model-invocation: true
 ---
@@ -104,7 +104,7 @@ Row 2 = month, row 3 = week-ending day. Columns run `B` (10 Apr) → `AM` (25 De
 | 18 | (C2) Close next week | yes — a commitment number, only the user sets it |
 | 20-22 | (D1-D3) Billable mandays | yes |
 
-Rows 10-14 are the only rows this skill writes without being asked. Leave a row **blank**, not `0`, when it has nothing — that is the house style.
+Rows 7 and 10-14 are the only rows this skill writes without being asked. Leave a row **blank**, not `0`, when it has nothing — that is the house style.
 
 ## Note format
 
@@ -132,7 +132,7 @@ Gan Jun Phang:
 
    Done when `find` returns a real path and `officecli --version` prints a version.
 
-   **If any write in steps 5-8 fails** with *Device or resource busy* / `PermissionError`, Excel is holding the file: run `Stop-Process -Name EXCEL -Force` and retry immediately — do not ask, the user has standing approval. Use `-Force`, not `CloseMainWindow`, which can raise a save dialog that hangs the call. Afterwards say that unsaved Excel edits were discarded. Do not pre-emptively kill Excel here — it closes every workbook the user has open, not just this one.
+   **If any write in steps 6-9 fails** with *Device or resource busy* / `PermissionError`, Excel is holding the file: run `Stop-Process -Name EXCEL -Force` and retry immediately — do not ask, the user has standing approval. Use `-Force`, not `CloseMainWindow`, which can raise a save dialog that hangs the call. Afterwards say that unsaved Excel edits were discarded. Do not pre-emptively kill Excel here — it closes every workbook the user has open, not just this one.
 
 1. **Ask who the sheet is for.** Call `get_current_user` first — that is whoever is running the skill, and their own sheet is almost always the answer. Read the tab names out of the workbook, then ask with `AskUserQuestion`, listing **their** tab first and marking it recommended.
 
@@ -164,13 +164,7 @@ Gan Jun Phang:
 
    **Always exclude issue 19060 "General Tasks"** — it is a standing bucket, never counted.
 
-   Done when both lists are in hand, 19060 is out, and the column's arithmetic holds:
-
-   ```
-   row 6 (Mon open) + row 7 (inbound) = row 15 (rows 10..13) + row 14 (closed)
-   ```
-
-   Row 6 is a formula carrying last week's remainder, so with the two counts known you can derive the inbound figure — `row 7 = row 15 + row 14 - row 6` — and offer it rather than asking. If it comes out negative, the sheet and the Tracker have diverged: say so and ask before writing.
+   Done when both lists are in hand and 19060 is out. Step 5 balances them.
 
    A colleague's list can under-return: the token only sees projects it belongs to. If the totals fall short, say so rather than writing a low number.
 
@@ -182,7 +176,32 @@ Gan Jun Phang:
 
    Done when every subtask has a user-confirmed row. **Do not write anything before this.**
 
-5. **Write the cells and notes.** First take **two** copies of the live file, back to back, into the scratchpad: `work.xlsx` to edit and `baseline.xlsx` to compare against in step 7. Both must be taken now, not earlier — a copy from the start of the session is missing whatever colleagues saved since, and pushing it back would erase their work (see *Traps*).
+5. **Tally.** The column's arithmetic is a gate, not a sanity check:
+
+   ```
+   row 6 (open Monday) + row 7 (inbound) = rows 10-13 (still open) + row 14 (closed this week)
+   ```
+
+   Only a **closure** takes a ticket out of the total — nothing else reduces it. Row 6 is a formula carrying last week's remainder, so with the two Tracker counts in hand the inbound figure is derived, never asked for:
+
+   ```
+   row 7 = (rows 10..13) + row 14 - row 6
+   ```
+
+   It must come out **>= 0**. A negative row 7 means the B side is short: tickets that should still be counted landed in neither Tracker list. Track them down yourself rather than handing the discrepancy back — two causes, both recoverable:
+
+   - **Closed on last Friday.** A ticket closed on the previous week's Friday falls outside that week's `updated_on` window and inside nobody's. Count it as **closed in the current week** (row 14), not the previous one.
+   - **Untouched for a week.** Usually a Subtask. It is still open, but nothing moved it, so it dropped out of the pull. It stays in its row 10-13 bucket — quiet is not closed.
+
+   Find them in **last week's cell notes**, which list that column's tickets by id: `python xlsx_notes.py read` on the previous week's column, rows 10-14. Every ticket named there must show up this week in a row 10-13 bucket, in row 14, or as a closure you can point at in an earlier week. What is left over is the leak; put it back in the row it belongs to.
+
+   **19060 "General Tasks" is out on both sides** — it never updates and never counts.
+
+   Done when the tally balances with a non-negative row 7, or you can name the ticket that breaks it and have said so before writing.
+
+6. **Write the cells and notes.** First take **two** copies of the live file, back to back, into the scratchpad: `work.xlsx` to edit and `baseline.xlsx` to compare against in step 8. Both must be taken now, not earlier — a copy from the start of the session is missing whatever colleagues saved since, and pushing it back would erase their work (see *Traps*).
+
+   Write the derived inbound into **row 7** alongside the rows 10-14 counts — the tally is only true on the sheet once it is there.
 
    Edit `work.xlsx`:
 
@@ -194,9 +213,9 @@ Gan Jun Phang:
 
    Use one call per change. `officecli batch` is all-or-nothing: one failed item silently discards the whole batch while still reporting the others as `"succeeded"`. If you do use it, assert `"failed": 0`.
 
-   To clear a cell, use `xlsx_notes.py fix` (step 6) rather than setting an empty value. To delete a note, find its index with `officecli query work.xlsx comment` (match the `Sheet: ref` preview) and `officecli remove work.xlsx "/<Sheet>/comment[N]"`.
+   To clear a cell, use `xlsx_notes.py fix` (step 7) rather than setting an empty value. To delete a note, find its index with `officecli query work.xlsx comment` (match the `Sheet: ref` preview) and `officecli remove work.xlsx "/<Sheet>/comment[N]"`.
 
-6. **Repair and validate.** officecli reorders `<ignoredErrors>` after `<legacyDrawing>`, which is invalid and makes Excel offer to "repair" the workbook. Always run:
+7. **Repair and validate.** officecli reorders `<ignoredErrors>` after `<legacyDrawing>`, which is invalid and makes Excel offer to "repair" the workbook. Always run:
 
    ```
    python xlsx_notes.py fix work.xlsx fixed.xlsx [<Sheet>!<cell-to-blank> ...]
@@ -207,7 +226,7 @@ Gan Jun Phang:
 
    Done when validate is clean.
 
-7. **Verify before copying over.** Compare the fixed copy against **`baseline.xlsx` from step 5** — not against any earlier backup, whose counts would differ for reasons that have nothing to do with your edit. Count **by local XML tag name**, never with a text grep:
+8. **Verify before copying over.** Compare the fixed copy against **`baseline.xlsx` from step 6** — not against any earlier backup, whose counts would differ for reasons that have nothing to do with your edit. Count **by local XML tag name**, never with a text grep:
 
    ```python
    L = lambda t: t.split('}')[-1]
@@ -217,9 +236,11 @@ Gan Jun Phang:
 
    officecli writes namespaced `<x:f>` and `<x:comment>`, so `grep -o '<f>'` reports "all formulas destroyed" when nothing is wrong. That false alarm has already triggered one needless restore.
 
-   Also confirm the other four people's sheets still hold their data (spot-check their row 6). Done when formulas match and only your notes were added.
+   Then re-check the **tally** on the values you actually wrote, adding them up yourself: `row 6 + row 7` must equal `rows 10+11+12+13 + row 14`, and `rows 10+11+12+13` is the Remaining that row 15 will show. Do not read row 15 off the file to check this — it is a formula whose cached value is stale until Excel recalculates on open, so it still shows last week's figure and proves nothing.
 
-8. **Write back, then wait for the upload yourself.** `cp` the fixed copy onto the synced path — OneDrive uploads it from there.
+   Also confirm the other four people's sheets still hold their data (spot-check their row 6). Done when formulas match, only your notes were added, and the tally holds on the written numbers.
+
+9. **Write back, then wait for the upload yourself.** `cp` the fixed copy onto the synced path — OneDrive uploads it from there.
 
    **Do not hand off yet.** Replacing the whole file makes OneDrive queue a full re-upload, which has taken as long as 18 minutes. If the user opens Excel inside that window they get a **read-only** workbook that never recovers (see *Traps*). Telling them to "watch for the green tray icon" is not enough — they open it anyway, and it is your race to close, not theirs.
 
@@ -248,7 +269,7 @@ An Excel note is not one XML edit. It needs an entry in `xl/comments*.xml`, a ma
 
 - **The SharePoint connector cannot see cell notes.** `read_resource` returns values and formulas only. Read notes from the local file with `xlsx_notes.py read`. Never conclude "there are no notes" from a connector read.
 - **OneDrive can silently revert your write.** Five people edit this workbook. If a colleague saves between your write and the upload, OneDrive cannot merge .xlsx — the server copy wins and your edit vanishes from disk. Symptom: the user opens the file and sees the change, closes it, reopens, and it is gone. Keep the write window short, and after the tray icon settles re-read the cells you wrote; if they are gone, re-apply the delta to the file as it now stands.
-- **Excel opens read-only if the upload is still in flight — and stays that way.** Symptom: the title bar reads `- Read-Only -` and the user cannot save. Office decides read-only when it opens an upload-pending synced file and latches that at open time; it never re-checks, so the window is still read-only long after sync finishes. Nothing is damaged and nothing is lost. Confirm it is this and not something worse: **no `~$` owner file** in the folder (Excel only creates one when opening for edit) and **no `fileSharing` / `workbookProtection`** in `xl/workbook.xml`. Then kill EXCEL, verify your cells and notes are still on disk, and tell them to reopen. Step 8 exists to stop this happening at all.
+- **Excel opens read-only if the upload is still in flight — and stays that way.** Symptom: the title bar reads `- Read-Only -` and the user cannot save. Office decides read-only when it opens an upload-pending synced file and latches that at open time; it never re-checks, so the window is still read-only long after sync finishes. Nothing is damaged and nothing is lost. Confirm it is this and not something worse: **no `~$` owner file** in the folder (Excel only creates one when opening for edit) and **no `fileSharing` / `workbookProtection`** in `xl/workbook.xml`. Then kill EXCEL, verify your cells and notes are still on disk, and tell them to reopen. Step 9 exists to stop this happening at all.
 - **Therefore: always re-copy the live file immediately before editing.** Applying a staged full-file snapshot from earlier in the session overwrites colleagues' work that landed in between. Apply only the delta, on top of whatever is on disk now.
 - **Sync may be missing from the SharePoint toolbar.** With only item-level access, `⋯` offers nothing but `Alert me`, and the parent folder throws "Unknown render failure". That is a permissions problem, not a workaround problem: the user needs adding to the Enterprise Solution site. Never substitute a downloaded copy — it is detached from SharePoint, so the edit reaches nobody.
 
