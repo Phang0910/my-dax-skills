@@ -152,7 +152,7 @@ Take today's date from the environment context. If the user names a different da
 
 ## Step 5 — Confirm, then write once
 
-Show the whole block and stop for a yes:
+Show the whole block in chat:
 
 ```
 Close #<id> — <subject>
@@ -163,7 +163,18 @@ Resolution:      <text>
 Resolution Date: <YYYY-MM-DD>
 ```
 
-On confirmation, **one** `mcp__claude_ai_Tracker__update_issue` call:
+Then **ask for the go-ahead with `AskUserQuestion`** — never end the turn on a typed "reply yes to
+proceed". The user picks an option instead of writing a message. Offer:
+
+1. `Close it` — write exactly the values shown.
+2. `Edit Resolution` — the user supplies different wording (via "Other" or a follow-up); redraft,
+   show the block again, and ask again.
+3. `Don't close yet` — stop without writing anything.
+
+Put the ticket number in the question itself (`Close #<id> with these values?`) so the choice is
+tied to the right ticket. Only option 1 leads to the write; anything else is a redraft or a stop.
+
+On `Close it`, **one** `mcp__claude_ai_Tracker__update_issue` call:
 
 - `status_id: 5`
 - `custom_fields: [{id: 7, ...}, {id: 52, ...}, {id: 53, ...}]`
