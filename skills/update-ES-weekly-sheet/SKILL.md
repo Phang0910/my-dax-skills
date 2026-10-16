@@ -11,7 +11,7 @@ Defaults: the sheet belonging to **whoever runs the skill**, and the week **cont
 
 ## Claude Code only — check this first
 
-Writing an Excel cell note needs `officecli`, a binary on the user's own machine, plus shell and Python against their real filesystem. Chat and Cowork execute code in a sandbox on Anthropic's servers, which can reach neither. This skill cannot run there.
+Writing goes through the user's own **desktop Excel** (PowerShell driving it over COM), and reading last week's notes needs Python against their real filesystem. Chat and Cowork execute code in a sandbox on Anthropic's servers, which can reach neither. This skill cannot run there.
 
 Before anything else:
 
@@ -30,12 +30,12 @@ Then stop. Do not offer a partial route: the SharePoint connector can read the s
 The workbook lives in SharePoint at `/sites/EnterpriseSolution/Shared Documents/General/08 Resources/`. **Never hardcode a local path.** Locate it:
 
 ```bash
-find "$HOME" -maxdepth 4 -name "ES Weekly Update_Customer Success Team.xlsx" -not -name '~$*' 2>/dev/null
+ls -1 "$HOME"/*/*"08 Resources"/"ES Weekly Update_Customer Success Team.xlsx" "$HOME"/*/*/*"08 Resources"/"ES Weekly Update_Customer Success Team.xlsx" 2>/dev/null
 ```
 
-One command, no `||` chaining — a hook that reformats command output can swallow the exit code and turn a working search into a false "not found".
+A glob, not `find`: output-rewriting hooks (RTK) have turned a working `find` into empty output on a machine where the file was synced. No `||` chaining either, for the same reason.
 
-The tidiest way to run this is with Claude Code **opened in the synced folder itself**, which puts the workbook in the session's own directory and settles any question of what it can reach. Worth mentioning once the user is set up; the `find` covers them either way.
+The tidiest way to run this is with Claude Code **opened in the synced folder itself**, which puts the workbook in the session's own directory and settles any question of what it can reach. Worth mentioning once the user is set up; the lookup covers them either way.
 
 Sub-second. Use `$HOME` (`/c/Users/<name>`), not `$USERPROFILE` — the latter is a Windows path and yields mixed separators like `C:\Users\x/DAXONET GROUP/...`.
 
@@ -50,7 +50,7 @@ Two hits to reject:
 - **`ES Weekly Update_Customer Success Team.xlsx.url`, ~180 bytes** — someone ran *Add shortcut* on the **file** instead of syncing the **folder**. It has no content; treat it as not found and delete it once the real folder is synced.
 - **A copy in `~/Downloads`** — not usable. It is detached from SharePoint: edits there reach nobody, and it goes stale the moment a colleague saves. If that is all there is, treat it as not found, run the setup below, and tell the user to delete the stray copy so it cannot be picked up later.
 
-### If `find` comes back empty (first run on a machine)
+### If the lookup comes back empty (first run on a machine)
 
 The workbook must be **synced**, so the edit reaches SharePoint through OneDrive. This is one click — never a tour of SharePoint's settings.
 
@@ -59,9 +59,9 @@ Give exactly this, and nothing more:
 > Open this link, click the **⋯** at the right of the toolbar, then **Sync**. Say yes to "This site is trying to open Microsoft OneDrive", and close the "We're syncing your files" box.
 > https://daxonet0.sharepoint.com/sites/EnterpriseSolution/Shared%20Documents/Forms/AllItems.aspx?id=%2Fsites%2FEnterpriseSolution%2FShared%20Documents%2FGeneral%2F08%20Resources
 
-**Sync**, not *Add shortcut to OneDrive*. Both work, but Sync is what the team actually uses, and it lands the folder in its own root — `~/DAXONET GROUP/Enterprise Solution - 08 Resources/` — whereas a shortcut lands under `~/OneDrive - DAXONET GROUP/`. The `find` catches either, so never re-do a setup that already worked.
+**Sync**, not *Add shortcut to OneDrive*. Both work, but Sync is what the team actually uses, and it lands the folder in its own root — `~/DAXONET GROUP/Enterprise Solution - 08 Resources/` — whereas a shortcut lands under `~/OneDrive - DAXONET GROUP/`. The lookup catches either, so never re-do a setup that already worked.
 
-Then verify it yourself — re-run the `find` every 10-15 seconds for up to about two minutes, since OneDrive pulls the folder down in the background. Announce success as soon as the file appears; do not ask the user whether it worked.
+Then verify it yourself — re-run the lookup every 10-15 seconds for up to about two minutes, since OneDrive pulls the folder down in the background. Announce success as soon as the file appears; do not ask the user whether it worked.
 
 If it still has not appeared:
 
@@ -80,7 +80,7 @@ One sheet per person, in workbook order. The Tracker id is who step 3 pulls issu
 | `Qianying` | `sheet4.xml` | Qianying | 190 |
 | `Jun Phang` | `sheet5.xml` | Jun Phang | 194 |
 
-Address sheets by **tab name** — that is what officecli paths take. Re-read the tabs and A4 from the file rather than trusting this copy; tabs get renamed and this table goes stale.
+Address sheets by **tab name** — that is what `es_write.ps1`'s `sheet` takes. Re-read the tabs and A4 from the file rather than trusting this copy; tabs get renamed and this table goes stale.
 
 **The `Khor` tab is unresolved.** Its A4 reads `Dimitri Ong`, and Tracker holds both as separate people — `WK Khor` is 60, `Dimitri Ong` is 79. One of the two labels is wrong, and picking the wrong id fills a manager's column with someone else's tickets. If that tab is chosen, ask which person it is and use the id they name; never infer it from the tab name or from A4.
 
@@ -117,24 +117,41 @@ Gan Jun Phang:
 19093 [Nichias] - Create batch job for stuck PR
 ```
 
-`<id> [Customer] - <short description>`. Reuse the wording already used for that ticket in earlier weeks rather than pasting the Tracker subject verbatim.
+`<id> [Customer] - <short description>`. Reuse the wording already used for that ticket in earlier weeks, from `context`'s *known wording* list, rather than pasting the Tracker subject verbatim.
 
 ## Steps
 
-0. **Pre-flight.** Two checks, both of which you fix yourself rather than reporting.
+**Fast path — about six tool calls end to end.** Batch independent calls in one message:
 
-   - **Locate the workbook** with the `find` above. Empty means not synced — run the Sync click from *Finding the file*, then poll until it appears. A copy in `Downloads` does not count as found.
-   - **officecli.** Run `officecli --version`. If it is missing, **install it yourself** — do not ask, and do not make the user read instructions:
-     ```powershell
-     irm https://d.officecli.ai/install.ps1 | iex
-     ```
-     It installs per-user into `%LOCALAPPDATA%\OfficeCLI`, needs no admin rights, and takes a few seconds. Re-check `officecli --version` afterwards; if the shell still cannot see it, call it by full path rather than telling the user to open a new terminal.
+1. **One shell call** for the lookup, a scratchpad copy, and `context` (step 0), sent **with** `get_current_user` (step 1);
+2. **both `list_issues` calls together** (step 3);
+3. **one `AskUserQuestion`** carrying every subtask (step 4; up to 4 per call);
+4. **one `es_write.ps1` run** (step 6), whose read-back is the check.
 
-   Done when `find` returns a real path and `officecli --version` prints a version.
+Do not write ad-hoc scripts to read the sheet. `context` already prints everything steps 1-5 need.
 
-   **If any write in steps 6-9 fails** with *Device or resource busy* / `PermissionError`, Excel is holding the file: run `Stop-Process -Name EXCEL -Force` and retry immediately — do not ask, the user has standing approval. Use `-Force`, not `CloseMainWindow`, which can raise a save dialog that hangs the call. Afterwards say that unsaved Excel edits were discarded. Do not pre-emptively kill Excel here — it closes every workbook the user has open, not just this one.
+0. **Pre-flight and context, in one shell call.** Lookup, copy, read:
 
-1. **Ask who the sheet is for.** Call `get_current_user` first — that is whoever is running the skill, and their own sheet is almost always the answer. Read the tab names out of the workbook, then ask with `AskUserQuestion`, listing **their** tab first and marking it recommended.
+   ```bash
+   F=$(ls -1 "$HOME"/*/*"08 Resources"/"ES Weekly Update_Customer Success Team.xlsx" "$HOME"/*/*/*"08 Resources"/"ES Weekly Update_Customer Success Team.xlsx" 2>/dev/null | head -1)
+   cp "$F" "<scratchpad>/es.xlsx" && py -I "<skill dir>/xlsx_notes.py" context "<scratchpad>/es.xlsx" "<tab>" [YYYY-MM-DD]
+   ```
+
+   - **Read a copy, never the synced file itself.** While OneDrive is syncing, a direct open fails with `PermissionError`; `cp` still works.
+   - **`py`, not `python`.** `python` may be the Microsoft Store stub that only prints "Python was not found". Fall back to `python` only if `py` is missing.
+   - **Empty lookup** means not synced: run the Sync click from *Finding the file*, then poll. A copy in `Downloads` does not count as found.
+
+   `context` prints:
+   - the tabs and A4;
+   - the target column for the date (default today), with last week's column beside it for rows 6-18;
+   - both columns' notes;
+   - the latest wording for every ticket noted in the last 8 weeks.
+
+   If the tab is unknown it lists the real ones. Desktop Excel needs no check here; step 6's script finds or opens it.
+
+   **Never kill Excel and never write the synced file directly.** Excel is the write path; the file on disk is only read.
+
+1. **Ask who the sheet is for.** `get_current_user` is whoever is running the skill, and their own sheet is almost always the answer. Ask with `AskUserQuestion` over the tabs `context` printed, listing **their** tab first and marking it recommended.
 
    Skip the question only when the invocation already names someone (`/update-ES-weekly-sheet Qianying`); if a name is given that matches no tab, stop and ask rather than guessing.
 
@@ -144,7 +161,7 @@ Gan Jun Phang:
 
    Override only when the user says so — "last week", "next week", or an explicit date. An explicit date resolves to the Friday of *that* date's week, so "8 Sep 2026" also means the 11 Sep column.
 
-   Find the column by reading rows 2-3 of the target sheet: row 2 carries the month on its first week only, so carry the last non-empty month forward while scanning right. Never count columns from memory — the month blocks are 3-5 weeks wide.
+   `context` resolves this from rows 2-3, carrying row 2's month forward, since it only appears on a block's first week. Pass the override date as its last argument. Never count columns from memory — the month blocks are 3-5 weeks wide.
 
    Done when you can state the column letter, its date, and which rule picked it (default vs. override). Say it back to the user before writing, so a wrong week is caught before it lands.
 
@@ -160,7 +177,7 @@ Gan Jun Phang:
    Then:
 
    - **Still open** → `list_issues`, `status_id: "open"`, `sort: "updated_on:desc"`. These distribute across rows 10-13.
-   - **Closed in the week** → `list_issues`, `status_id: "closed"`, `updated_on: "><<Monday>|<Friday>"` (the target week's dates). This is row 14. The filter is on *updated*, not closed, so a ticket closed earlier and edited this week can slip in — check each one's journals before counting it.
+   - **Closed in the week** → `list_issues`, `status_id: "closed"`, `sort: "updated_on:desc"`, `limit: 15`, then keep those updated since **last Friday**. Do not pass `updated_on`: the connector ignores it and returns every closed issue ever. This is row 14. *Updated* is not *closed*, so a ticket closed earlier and edited this week can slip in. Any that `context` shows in last week's row 10-13 notes is a genuine closure; check journals only for the rest.
 
    **Always exclude issue 19060 "General Tasks"** — it is a standing bucket, never counted.
 
@@ -193,86 +210,50 @@ Gan Jun Phang:
    - **Closed on last Friday.** A ticket closed on the previous week's Friday falls outside that week's `updated_on` window and inside nobody's. Count it as **closed in the current week** (row 14), not the previous one.
    - **Untouched for a week.** Usually a Subtask. It is still open, but nothing moved it, so it dropped out of the pull. It stays in its row 10-13 bucket — quiet is not closed.
 
-   Find them in **last week's cell notes**, which list that column's tickets by id: `python xlsx_notes.py read` on the previous week's column, rows 10-14. Every ticket named there must show up this week in a row 10-13 bucket, in row 14, or as a closure you can point at in an earlier week. What is left over is the leak; put it back in the row it belongs to.
+   Find them in **last week's cell notes**, which `context` already printed by id. Every ticket named there must show up this week in a row 10-13 bucket, in row 14, or as a closure you can point at in an earlier week. What is left over is the leak; put it back in the row it belongs to.
 
    **19060 "General Tasks" is out on both sides** — it never updates and never counts.
 
    Done when the tally balances with a non-negative row 7, or you can name the ticket that breaks it and have said so before writing.
 
-6. **Write the cells and notes.** First take **two** copies of the live file, back to back, into the scratchpad: `work.xlsx` to edit and `baseline.xlsx` to compare against in step 8. Both must be taken now, not earlier — a copy from the start of the session is missing whatever colleagues saved since, and pushing it back would erase their work (see *Traps*).
+6. **Write through Excel.** Put the column's changes in a spec file (UTF-8 JSON) in the scratchpad: the derived inbound in **row 7**, the counts in rows 10-14, and a note per row that has tickets. `null` blanks a cell or removes its note; a row left out is not touched.
 
-   Write the derived inbound into **row 7** alongside the rows 10-14 counts — the tally is only true on the sheet once it is there.
-
-   Edit `work.xlsx`:
-
-   ```
-   officecli set work.xlsx "/<Sheet>/<Col><Row>" --prop value=<n>
-   officecli add work.xlsx "/<Sheet>" --type comment \
-     --prop ref=<Col><Row> --prop author="<sheet owner>" --prop text="<note>"
+   ```json
+   {"sheet": "Jun Phang", "col": "AC", "day": 16,
+    "values": {"7": 3, "10": 3, "11": 1, "12": 1, "13": null, "14": 5},
+    "notes":  {"10": "Gan Jun Phang:\n19829 [MMM] - User access checklist\n\n19816 [VSTECS] - ...",
+               "13": null}}
    ```
 
-   Use one call per change. `officecli batch` is all-or-nothing: one failed item silently discards the whole batch while still reporting the others as `"succeeded"`. If you do use it, assert `"failed": 0`.
-
-   To clear a cell, use `xlsx_notes.py fix` (step 7) rather than setting an empty value. To delete a note, find its index with `officecli query work.xlsx comment` (match the `Sheet: ref` preview) and `officecli remove work.xlsx "/<Sheet>/comment[N]"`.
-
-7. **Repair and validate.** officecli reorders `<ignoredErrors>` after `<legacyDrawing>`, which is invalid and makes Excel offer to "repair" the workbook. Always run:
-
-   ```
-   python xlsx_notes.py fix work.xlsx fixed.xlsx [<Sheet>!<cell-to-blank> ...]
-   officecli validate fixed.xlsx       # must print "Validation passed"
+   ```powershell
+   powershell -NoProfile -ExecutionPolicy Bypass -File es_write.ps1 <spec.json>
    ```
 
-   It also drops `xl/calcChain.xml`. That is fine — Excel recalculates on open, which is why row 15 still shows a stale cached value on disk. **Never** hand-patch `calcPr fullCalcOnLoad`: the obvious regex strips the `x:` namespace prefix and corrupts `workbook.xml`.
+   The script attaches to the running Excel, or opens the workbook from its SharePoint URL, and writes into the **live, co-authored** workbook. It refuses, and writes nothing, unless the workbook is editable with **AutoSave on**, and unless row 3 of `col` reads `day`, which catches a wrong week. It prints each written row back with its note's ticket count.
 
-   Done when validate is clean.
+   If it refuses:
+   - **AutoSave off / read-only** — the workbook was opened from a local or downloaded copy, or offline. Ask the user to close it and re-run; the script then opens it from SharePoint itself.
+   - **`Call was rejected by callee` / `0x800AC472`** — a cell is in edit mode or a dialog is up in Excel. Ask the user to press Esc, then re-run. The writes are idempotent.
 
-8. **Verify before copying over.** Compare the fixed copy against **`baseline.xlsx` from step 6** — not against any earlier backup, whose counts would differ for reasons that have nothing to do with your edit. Count **by local XML tag name**, never with a text grep:
+   The note's author is Excel's user name (`Application.UserName`), which on the user's own sheet is the owner. On a colleague's sheet it is the invoker; the text's first line still names the owner.
 
-   ```python
-   L = lambda t: t.split('}')[-1]
-   # count elements where L(tag) == 'f'        -> formulas, must be unchanged
-   # count elements where L(tag) == 'comment'  -> notes, must be old + new
-   ```
+7. **Verify.** Re-check the **tally** on the values you wrote, adding them up yourself: `row 6 + row 7` must equal `rows 10+11+12+13 + row 14`.
 
-   officecli writes namespaced `<x:f>` and `<x:comment>`, so `grep -o '<f>'` reports "all formulas destroyed" when nothing is wrong. That false alarm has already triggered one needless restore.
-
-   Then re-check the **tally** on the values you actually wrote, adding them up yourself: `row 6 + row 7` must equal `rows 10+11+12+13 + row 14`, and `rows 10+11+12+13` is the Remaining that row 15 will show. Do not read row 15 off the file to check this — it is a formula whose cached value is stale until Excel recalculates on open, so it still shows last week's figure and proves nothing.
-
-   Also confirm the other four people's sheets still hold their data (spot-check their row 6). Done when formulas match, only your notes were added, and the tally holds on the written numbers.
-
-9. **Write back, then wait for the upload yourself.** `cp` the fixed copy onto the synced path — OneDrive uploads it from there.
-
-   **Do not hand off yet.** Replacing the whole file makes OneDrive queue a full re-upload, which has taken as long as 18 minutes. If the user opens Excel inside that window they get a **read-only** workbook that never recovers (see *Traps*). Telling them to "watch for the green tray icon" is not enough — they open it anyway, and it is your race to close, not theirs.
-
-   Note the local file's mtime right after the `cp` and hold on to it — that is your write time. Do not re-stat it while polling; OneDrive touches the local file during sync.
-
-   Then poll the server copy until it carries your write, re-checking every 20-30 seconds for up to about five minutes. Load the tool first — it is not available by default:
-
-   ```
-   ToolSearch("select:mcp__claude_ai_Microsoft_365__sharepoint_search")
-   sharepoint_search "ES Weekly Update_Customer Success Team", fileType xlsx
-   ```
-
-   This reads the file's **metadata only** — `lastModifiedDateTime`, in UTC. That is not the connector limitation in *Traps*: the connector cannot see cell *content* or notes, but its timestamps are reliable. Once the server timestamp is at or past your write time, the upload has landed. Then re-read the cells and notes you wrote from the local file — that is the revert check in *Traps* — and only now tell the user it is safe to open.
-
-   If it has not landed after five minutes, say so plainly and tell them not to open the file yet, rather than handing off a file that will open read-only.
-
-   **No M365 connector attached?** Fall back to telling the user to wait for the OneDrive tray icon to go green before opening Excel, and warn them that opening early yields a read-only window they will have to close and reopen. Do not treat a missing connector as a blocker.
+   The script's read-back comes from the live co-authored workbook, so it is the check. Do not wait for the upload or poll SharePoint. Co-authoring syncs the changed cells in the background, the user can keep working in Excel throughout, and there is no read-only window to guard against.
 
    Finish by listing the exact cells and notes written, so they can eyeball one and stop.
 
-## Why officecli is mandatory
+## Why write through Excel
 
-An Excel note is not one XML edit. It needs an entry in `xl/comments*.xml`, a matching `<v:shape>` in the sheet's VML drawing, and a consistent author table — get any of it wrong and the red triangle never appears. Reading notes needs none of that, so `xlsx_notes.py read` handles it with stdlib alone. Writing them does. Install officecli rather than hand-rolling the VML.
+Five people edit this workbook. Replacing the `.xlsx` on the synced path made OneDrive re-upload the whole file. It cannot merge `.xlsx`, so a colleague's save during that upload silently dropped one side, and opening Excel before it finished latched the window read-only. Writing through a co-authoring Excel session sends only the changed cells and merges colleagues' concurrent edits, the same as a person typing. Excel also writes notes correctly (comments part, VML shape, author table), so nothing needs repairing afterwards.
 
 ## Traps
 
 - **The SharePoint connector cannot see cell notes.** `read_resource` returns values and formulas only. Read notes from the local file with `xlsx_notes.py read`. Never conclude "there are no notes" from a connector read.
-- **OneDrive can silently revert your write.** Five people edit this workbook. If a colleague saves between your write and the upload, OneDrive cannot merge .xlsx — the server copy wins and your edit vanishes from disk. Symptom: the user opens the file and sees the change, closes it, reopens, and it is gone. Keep the write window short, and after the tray icon settles re-read the cells you wrote; if they are gone, re-apply the delta to the file as it now stands.
-- **Excel opens read-only if the upload is still in flight — and stays that way.** Symptom: the title bar reads `- Read-Only -` and the user cannot save. Office decides read-only when it opens an upload-pending synced file and latches that at open time; it never re-checks, so the window is still read-only long after sync finishes. Nothing is damaged and nothing is lost. Confirm it is this and not something worse: **no `~$` owner file** in the folder (Excel only creates one when opening for edit) and **no `fileSharing` / `workbookProtection`** in `xl/workbook.xml`. Then kill EXCEL, verify your cells and notes are still on disk, and tell them to reopen. Step 9 exists to stop this happening at all.
-- **Therefore: always re-copy the live file immediately before editing.** Applying a staged full-file snapshot from earlier in the session overwrites colleagues' work that landed in between. Apply only the delta, on top of whatever is on disk now.
+- **Never copy a file onto the synced path.** That is the old write route, and both of its failures come back with it: a colleague's concurrent save silently reverts one side, and Excel opened mid-upload stays read-only. All writes go through `es_write.ps1`.
+- **A note's `TextFrame.AutoSize` throws `0x800A03EC` on a co-authored workbook.** The script leaves note sizing alone for that reason; do not add it back.
 - **Sync may be missing from the SharePoint toolbar.** With only item-level access, `⋯` offers nothing but `Alert me`, and the parent folder throws "Unknown render failure". That is a permissions problem, not a workaround problem: the user needs adding to the Enterprise Solution site. Never substitute a downloaded copy — it is detached from SharePoint, so the edit reaches nobody.
 
 - **This skill is used by the whole Customer Success team, not just its author.** Never mention another person's machine, username, or home directory, and never paste a `C:\Users\<someone-else>\...` path at the user. Resolve every path from `$HOME` on the machine you are running on.
 
-- **Keep setup to one action.** Anything a teammate must do by hand is one sentence with one link and one button. No numbered SharePoint UI tours, no "tick this, then expand that". If a check fails, do the fix yourself where you can (officecli) and ask for the single click where you cannot (`⋯` → **Sync**). Then verify it worked rather than asking them to confirm.
+- **Keep setup to one action.** Anything a teammate must do by hand is one sentence with one link and one button. No numbered SharePoint UI tours, no "tick this, then expand that". If a check fails, do the fix yourself where you can and ask for the single click where you cannot (`⋯` → **Sync**). Then verify it worked rather than asking them to confirm.

@@ -28,7 +28,7 @@ something is missing. This table is only so you know what a prompt is asking for
 | everything | the **Tracker** connector | enable it in Claude settings → Connectors |
 | `update-weekly-report`, `KB-this` | the **DAXONET Notes** connector | same place |
 | `raise-ms-support-ticket` | **Claude in Chrome** (optional) | take the guide-pack path instead — it needs no browser at all |
-| `update-ES-weekly-sheet` | **Claude Code**, plus the SharePoint folder synced | it checks first and tells you to switch; installs `officecli` for you, and gives you one link + **Sync** for the folder |
+| `update-ES-weekly-sheet` | **Claude Code**, plus the SharePoint folder synced | it checks first and tells you to switch, and gives you one link + **Sync** for the folder; writes go through your desktop Excel |
 
 The two person-scoped skills — `update-weekly-report` and `update-ES-weekly-sheet` — default to **you**, resolved from your Tracker account rather than a name baked into the skill. Pass
 a name to work on a colleague's behalf. The rest are ticket-scoped: give them a ticket number.
@@ -244,17 +244,17 @@ then writes both the counts and the per-ticket cell notes.
 
 First run, once per person: install this plugin, enable the Tracker connector, and click **Sync**
 on the SharePoint folder (that click is what puts the workbook on your disk). Then open Claude Code
-in that synced folder and run the skill. `officecli` installs itself.
+in that synced folder and run the skill.
 
-The rest is automatic. It installs `officecli` for you (per-user, no admin) and
-finds the workbook wherever OneDrive has put it, whatever your username. If it is not synced yet,
-it gives you one link and one button — the toolbar's `⋯` then **Sync** — and then waits and
-checks for itself, so you are not asked to confirm anything.
+The rest is automatic. It finds the workbook wherever OneDrive has put it, whatever your username.
+If it is not synced yet, it gives you one link and one button — the toolbar's `⋯` then **Sync** —
+and then waits and checks for itself, so you are not asked to confirm anything.
 
-`officecli` is required because writing an Excel cell note touches the comments part, the VML
-drawing and the author table together, so it is not a hand-rollable XML edit. Reading notes is
-stdlib-only via the bundled `xlsx_notes.py`, which also repairs the schema damage officecli leaves
-behind.
+Writes go through your desktop Excel (the bundled `es_write.ps1`), with the workbook open from
+SharePoint and AutoSave on. Excel co-authors: it sends only the changed cells and merges whatever
+teammates are editing at the same moment, so nobody's update overwrites anyone else's, and you can
+keep the workbook open throughout. The synced file on disk is only read — last week's notes come
+from it via the stdlib-only `xlsx_notes.py`, since the SharePoint connector cannot see notes.
 
 ### KB-this
 
