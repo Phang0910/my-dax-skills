@@ -1,5 +1,5 @@
 ---
-name: update-ES-weekly-sheet
+name: update-es-weekly-sheet
 description: Fill a week's column in the ES Weekly Update team tracker (.xlsx) from the Tracker — split open issues across the status rows, balance the column's tally, and write the per-ticket cell notes. Claude Code only; it edits the workbook on the user's own machine.
 argument-hint: "[person] [week-ending date, e.g. 11 September 2026]"
 disable-model-invocation: true
@@ -21,7 +21,7 @@ ls "$HOME" >/dev/null 2>&1 && echo shell-ok
 
 If there is no shell tool at all, or it cannot see the user's home directory, stop and say:
 
-> This one needs Claude Code — it edits the workbook on your own machine, which Chat and Cowork can't reach. Open Claude Code and run `/update-ES-weekly-sheet` there.
+> This one needs Claude Code — it edits the workbook on your own machine, which Chat and Cowork can't reach. Open Claude Code and run `/update-es-weekly-sheet` there.
 
 Then stop. Do not offer a partial route: the SharePoint connector can read the sheet's numbers but can neither read nor write its cell notes, so there is nothing useful to do without a shell.
 
@@ -153,7 +153,7 @@ Do not write ad-hoc scripts to read the sheet. `context` already prints everythi
 
 1. **Ask who the sheet is for.** `get_current_user` is whoever is running the skill, and their own sheet is almost always the answer. Ask with `AskUserQuestion` over the tabs `context` printed, listing **their** tab first and marking it recommended.
 
-   Skip the question only when the invocation already names someone (`/update-ES-weekly-sheet Qianying`); if a name is given that matches no tab, stop and ask rather than guessing.
+   Skip the question only when the invocation already names someone (`/update-es-weekly-sheet Qianying`); if a name is given that matches no tab, stop and ask rather than guessing.
 
    Never hardcode a default person — this skill is shared, and the author's name is not the user's. Done when you have a tab name, plus the current user's Tracker id and name for steps 3 and 5.
 

@@ -1,10 +1,10 @@
 ---
-name: KB-this
+name: kb-this
 description: Write a knowledge base article about a resolved case and publish it to DAXONET Notes under the customer's KB page, in the house format. Use when the user asks to KB a case, write it up as a knowledge base article, or document a fix in Notes.
 argument-hint: "[ticket no or case description]"
 ---
 
-# KB-this
+# kb-this
 
 Turn a resolved case into a knowledge base article and publish it to DAXONET Notes as a child of
 the customer's KB parent page.

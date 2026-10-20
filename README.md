@@ -26,14 +26,14 @@ something is missing. This table is only so you know what a prompt is asking for
 | Skill | Needs | If it's missing |
 |---|---|---|
 | everything | the **Tracker** connector | enable it in Claude settings → Connectors |
-| `update-weekly-report`, `KB-this` | the **DAXONET Notes** connector | same place |
+| `update-weekly-report`, `kb-this` | the **DAXONET Notes** connector | same place |
 | `raise-ms-support-ticket` | **Claude in Chrome** (optional) | take the guide-pack path instead — it needs no browser at all |
-| `update-ES-weekly-sheet` | **Claude Code**, plus the SharePoint folder synced | it checks first and tells you to switch, and gives you one link + **Sync** for the folder; writes go through your desktop Excel |
+| `update-es-weekly-sheet` | **Claude Code**, plus the SharePoint folder synced | it checks first and tells you to switch, and gives you one link + **Sync** for the folder; writes go through your desktop Excel |
 
-The two person-scoped skills — `update-weekly-report` and `update-ES-weekly-sheet` — default to **you**, resolved from your Tracker account rather than a name baked into the skill. Pass
+The two person-scoped skills — `update-weekly-report` and `update-es-weekly-sheet` — default to **you**, resolved from your Tracker account rather than a name baked into the skill. Pass
 a name to work on a colleague's behalf. The rest are ticket-scoped: give them a ticket number.
 
-Only `update-ES-weekly-sheet` is Claude Code-only — it edits the workbook on your own disk, which Chat and Cowork cannot reach because they run code on Anthropic's servers. Everything else works in Chat and Cowork too, since it all goes through connectors.
+Only `update-es-weekly-sheet` is Claude Code-only — it edits the workbook on your own disk, which Chat and Cowork cannot reach because they run code on Anthropic's servers. Everything else works in Chat and Cowork too, since it all goes through connectors.
 
 ## Skills
 
@@ -48,8 +48,8 @@ Only `update-ES-weekly-sheet` is Claude Code-only — it edits the workbook on y
 | `raise-ms-support-ticket` | Raises a Microsoft support request in the Power Platform admin center — drafts the description and the answers Microsoft will ask for, gets them approved in one question, then either hands you the pack to file yourself or drives Chrome and submits it, and writes the Microsoft ticket number into the Tracker ticket's Principal Case # field. |
 | `close-ticket` | Closes a resolved Tracker ticket — sets the status, picks the Root Cause from the dropdown, writes the Resolution in the internal house style, and stamps today as the Resolution Date. The natural next step after `draft-closing-email`. |
 | `update-weekly-report` | Owns the Customer Success Weekly Report in DAXONET Notes for a given week — creates that week's doc if there isn't one, otherwise rewrites the existing one, including any change you ask for by name. |
-| `update-ES-weekly-sheet` | Fills a week's column in the ES Weekly Update team tracker spreadsheet from the Tracker — splits your open issues across the In Progress / In Review / Closed rows and writes the per-ticket Excel cell notes. |
-| `KB-this` | Writes a knowledge base article about a resolved case and publishes it to DAXONET Notes under the customer's KB page, in the house format. |
+| `update-es-weekly-sheet` | Fills a week's column in the ES Weekly Update team tracker spreadsheet from the Tracker — splits your open issues across the In Progress / In Review / Closed rows and writes the per-ticket Excel cell notes. |
+| `kb-this` | Writes a knowledge base article about a resolved case and publishes it to DAXONET Notes under the customer's KB page, in the house format. |
 
 ### draft-progress
 
@@ -235,7 +235,7 @@ what the Tracker no longer supports, so sections stay inside the template's coun
 a change ("in the 28 August report, add the Luvata RAF fix") and it edits that report instead of
 starting a new one.
 
-### update-ES-weekly-sheet
+### update-es-weekly-sheet
 
 Writes one week's column on your sheet in `ES Weekly Update_Customer Success Team.xlsx` (the
 SharePoint-synced team tracker, not the Notes report). It pulls your open Tracker issues, asks you
@@ -256,7 +256,7 @@ teammates are editing at the same moment, so nobody's update overwrites anyone e
 keep the workbook open throughout. The synced file on disk is only read — last week's notes come
 from it via the stdlib-only `xlsx_notes.py`, since the SharePoint connector cannot see notes.
 
-### KB-this
+### kb-this
 
 Turns a resolved case into a KB article and publishes it to DAXONET Notes as a child of the
 customer's KB parent page (for Panasonic, the `PANASONIC` page).
