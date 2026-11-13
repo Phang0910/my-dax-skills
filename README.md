@@ -28,6 +28,7 @@ something is missing. This table is only so you know what a prompt is asking for
 | everything | the **Tracker** connector | enable it in Claude settings → Connectors |
 | `update-weekly-report`, `kb-this` | the **DAXONET Notes** connector | same place |
 | `raise-ms-support-ticket` | **Claude in Chrome** (optional) | take the guide-pack path instead — it needs no browser at all |
+| `analyse-ticket` | **Claude in Chrome** or the built-in browser, for ticket images and SQL Execute; **DAXONET Notes** and **Microsoft Learn** for known answers | it falls back to the built-in browser on its own; without a browser it asks you to run the SQL and paste the images |
 | `update-es-weekly-sheet` | **Claude Code**, plus the SharePoint folder synced | it checks first and tells you to switch, and gives you one link + **Sync** for the folder; writes go through your desktop Excel |
 
 The two person-scoped skills — `update-weekly-report` and `update-es-weekly-sheet` — default to **you**, resolved from your Tracker account rather than a name baked into the skill. Pass
@@ -39,6 +40,7 @@ Only `update-es-weekly-sheet` is Claude Code-only — it edits the workbook on y
 
 | Skill | What it does |
 |---|---|
+| `analyse-ticket` | Analyses a ticket to its root cause — reads every journal and image, checks known answers, the custom and standard code, and the real data through SQL Execute (UAT first), then proposes the fix, workaround or setup change. |
 | `draft-progress` | Drafts a short progress/completion note for a Tracker (Redmine) ticket in the house format, shows it with the ticket number for confirmation, then posts it to the ticket. |
 | `draft-email` | Drafts a reply email to a customer or vendor in the house style, then hands it back for you to review and send yourself. |
 | `draft-acknowledge-email` | Drafts the first-response acknowledgement email for a newly registered support case — confirms the Support Case ID and the assigned consultant, both read off Tracker. |
@@ -50,6 +52,32 @@ Only `update-es-weekly-sheet` is Claude Code-only — it edits the workbook on y
 | `update-weekly-report` | Owns the Customer Success Weekly Report in DAXONET Notes for a given week — creates that week's doc if there isn't one, otherwise rewrites the existing one, including any change you ask for by name. |
 | `update-es-weekly-sheet` | Fills a week's column in the ES Weekly Update team tracker spreadsheet from the Tracker — splits your open issues across the In Progress / In Review / Closed rows and writes the per-ticket Excel cell notes. |
 | `kb-this` | Writes a knowledge base article about a resolved case and publishes it to DAXONET Notes under the customer's KB page, in the house format. |
+
+### analyse-ticket
+
+Takes a ticket from "what is wrong" to a proven root cause and a proposed action, and stops there.
+Building the fix, the customer email and closing the ticket are the other skills.
+
+It reads the whole ticket. Text-only tickets come straight from the Tracker connector. Images and
+files open in **Claude in Chrome**, or the built-in browser if Chrome is not connected — the
+connector cannot see them, and on #19264 the first clue was in a screenshot.
+
+It checks for a known answer first (DAXONET Notes KBs, Microsoft Learn), then reads the
+customer's extensions and the standard code on the symptom path, and asks early for setup
+screenshots.
+
+Data is checked in **UAT first** through SQL Execute. Only when UAT does not have the ticket's
+records does it ask whether to check production — read-only, and only with your yes. It asks once
+whether you run the SQL or it does. Every query is one statement, checked against the AOT first,
+and labelled with its environment.
+
+Every finding carries an evidence level — hypothesis, supported, reproduced, confirmed. A cause
+is "reproduced" only when the symptom was produced on purpose in UAT, and "confirmed" only when
+the opposite test also passed. Colleague conclusions in the journals start as hypotheses and are
+checked again.
+
+The output is ASD-STE100 style: a four-line summary first (problem, cause, action, next step),
+then the details and a handover block for the next skill.
 
 ### draft-progress
 
