@@ -28,7 +28,7 @@ something is missing. This table is only so you know what a prompt is asking for
 | everything | the **Tracker** connector | enable it in Claude settings → Connectors |
 | `update-weekly-report`, `kb-this` | the **DAXONET Notes** connector | same place |
 | `raise-ms-support-ticket` | **Claude in Chrome** (optional) | take the guide-pack path instead — it needs no browser at all |
-| `analyse-ticket` | **Claude in Chrome** or the built-in browser, for ticket images and SQL Execute; **DAXONET Notes** and **Microsoft Learn** for known answers | it falls back to the built-in browser on its own; without a browser it asks you to run the SQL and paste the images |
+| `analyse-ticket` | **Claude in Chrome** or the built-in browser, for ticket images and SQL Execute; **DAXONET Notes** and **Microsoft Learn** for known answers; the standard and custom code folders ([setup](skills/analyse-ticket/reference/setup.md)) | it falls back to the built-in browser on its own; without a browser it asks you to run the SQL and paste the images; a missing code folder stops it with the setup step to do |
 | `update-es-weekly-sheet` | **Claude Code**, plus the SharePoint folder synced | it checks first and tells you to switch, and gives you one link + **Sync** for the folder; writes go through your desktop Excel |
 
 The two person-scoped skills — `update-weekly-report` and `update-es-weekly-sheet` — default to **you**, resolved from your Tracker account rather than a name baked into the skill. Pass
@@ -54,6 +54,11 @@ Only `update-es-weekly-sheet` is Claude Code-only — it edits the workbook on y
 | `kb-this` | Writes a knowledge base article about a resolved case and publishes it to DAXONET Notes under the customer's KB page, in the house format. |
 
 ### analyse-ticket
+
+**Before first use**, follow [the one-time setup](skills/analyse-ticket/reference/setup.md): the
+standard code in `C:\D365Std`, each customer's custom code as a Git or TFVC working copy, and both
+folders added to Claude. The skill reads the same page and points you to the right section when a
+folder is missing.
 
 Takes a ticket from "what is wrong" to a proven root cause and a proposed action, and stops there.
 Building the fix, the customer email and closing the ticket are the other skills.

@@ -14,6 +14,18 @@ code, and keep to the folders they select.
 | Customer customizations | The customer's repo folder in this environment, for example `C:\Project\<Customer>\Trunk\Main\Metadata\<Model>\<Model>\` |
 | Standard application | `C:\Users\<user>\AppData\Local\Microsoft\Dynamics365\<version>\PackagesLocalDirectory\` |
 
+**A readiness check fails** (no `C:\D365Std`, a missing version folder, or no custom code for the
+customer) → show the user the matching section of [`setup.md`](setup.md), then stop until the
+folder is added.
+
+**Get the latest custom code** before you read it, and record the version in the Checks section
+of the output:
+
+- A read-only copy under `C:\Custom\` → update it yourself: `git -C <folder> pull --ff-only` for
+  Git, `tf get <folder> /recursive` for TFVC. The update commands are in `setup.md`.
+- A developer workspace (for example `C:\Project\<Customer>\Trunk\Main`) → ask the user before you
+  update it, because it can hold their pending changes.
+
 Both layouts are `<Package>\<Model>\Ax*\<Name>.xml` (for example `ApplicationSuite\Foundation\AxTable\PurchLine.xml`).
 Inside a model, each element is one XML file: `AxClass\<Name>.xml`, `AxTable\<Name>.xml`,
 `AxForm\<Name>.xml`, `AxEnum\<Name>.xml`, and the `...Extension` folders.
