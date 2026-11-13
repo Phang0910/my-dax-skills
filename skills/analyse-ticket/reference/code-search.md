@@ -2,11 +2,19 @@
 
 ## Where the code is
 
+**`C:\D365Std` exists** (the shared standard-source export) → read `C:\D365Std\CLAUDE.md` now,
+unless it is already in your context. It maps each customer to its standard version folder and
+its custom code repo, and it has two readiness checks. Complete both checks before you read any
+code, and keep to the folders they select.
+
+**`C:\D365Std` does not exist** (a dev VM) → use the local installation:
+
 | Code | Location |
 |---|---|
-| Customer customizations | The customer's project folder, for example `C:\Project\<Customer>\Trunk\Main\Metadata\<Model>\<Model>\` |
-| Standard application | `C:\Users\<user>\AppData\Local\Microsoft\Dynamics365\<version>\PackagesLocalDirectory\<Package>\<Model>\` (for example `ApplicationSuite\Foundation\`) |
+| Customer customizations | The customer's repo folder in this environment, for example `C:\Project\<Customer>\Trunk\Main\Metadata\<Model>\<Model>\` |
+| Standard application | `C:\Users\<user>\AppData\Local\Microsoft\Dynamics365\<version>\PackagesLocalDirectory\` |
 
+Both layouts are `<Package>\<Model>\Ax*\<Name>.xml` (for example `ApplicationSuite\Foundation\AxTable\PurchLine.xml`).
 Inside a model, each element is one XML file: `AxClass\<Name>.xml`, `AxTable\<Name>.xml`,
 `AxForm\<Name>.xml`, `AxEnum\<Name>.xml`, and the `...Extension` folders.
 
