@@ -101,7 +101,7 @@ function Invoke-FullDownload([int]$changeset, [hashtable]$headers) {
     try {
         $zip = Join-Path $tmp 'branch.zip'
         $p = [Uri]::EscapeDataString($ServerPath)
-        $uri = "{0}/_apis/tfvc/items?path={1}&versionDescriptor.versionType=changeset&versionDescriptor.version={2}&recursionLevel=full&`$format=zip&api-version={3}" -f $Collection.TrimEnd('/'), $p, $changeset, $ApiVersion
+        $uri = "{0}/_apis/tfvc/items?path={1}&versionDescriptor.versionType=changeset&versionDescriptor.version={2}&`$format=zip&api-version={3}" -f $Collection.TrimEnd('/'), $p, $changeset, $ApiVersion
         Write-Host "Downloading $ServerPath at C$changeset as a zip..."
         Invoke-WebRequest -Uri $uri -Headers $headers -OutFile $zip -UseBasicParsing
         $ex = Join-Path $tmp 'x'
@@ -197,6 +197,7 @@ function Invoke-Incremental([int]$from, [int]$to, [hashtable]$headers) {
 
 if ($SavePat) {
     if (-not $Collection) { throw 'Give -Collection (for example https://dev.azure.com/contoso).' }
+    if ($Collection -match '[<>]') { throw "Replace <org> in -Collection with the organisation name from the Azure DevOps address bar (https://dev.azure.com/<org>)." }
     New-Item -ItemType Directory -Path $PatDir -Force | Out-Null
     $secure = Read-Host "PAT for $(Get-OrgName $Collection) (Code: Read scope)" -AsSecureString
     $secure | Export-Clixml (Get-PatFile $Collection)

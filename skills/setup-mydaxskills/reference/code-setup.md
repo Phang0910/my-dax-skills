@@ -111,15 +111,37 @@ Azure DevOps REST API. The first run downloads the branch as one zip. Later runs
 files changed by newer changesets, and apply deletes and renames. Ask Claude for the script's full
 path on your PC — it is in the plugin folder.
 
-1. Create a **personal access token** in the project's Azure DevOps: your profile picture >
-   **Personal access tokens** > **New Token**. Scope: **Code > Read** only. Pick an expiry date
-   and note it.
-2. Save the token once per organisation. Run this **yourself**, in your own terminal — it asks
-   for the token and stores it encrypted for your Windows user:
+1. Create a **personal access token (PAT)** in the project's Azure DevOps:
+   1. Open `https://dev.azure.com/<org>/_usersSettings/tokens`. `<org>` is the organisation
+      name in the address bar of the project's Azure DevOps (`https://dev.azure.com/<org>/...`).
+      To list the organisations your account can open, go to https://aex.dev.azure.com/me.
+      From the menus: the **User settings** icon (a person with a small gear, top right, left of
+      your profile picture — not the profile picture itself) > **Personal access tokens**.
+   2. Click **+ New Token** and fill in the dialog:
+
+      | Field | Fill in |
+      |---|---|
+      | **Name** | Any name, for example `Claude TFVC read` |
+      | **Organization** | The project's organisation (already selected) |
+      | **Expiration (UTC)** | 30 days is fine. Pick a longer option for fewer renewals, if the org allows it |
+      | **Scopes** | **Custom defined**, then under **Code** tick **Read** only. Leave all other boxes empty |
+
+   3. Click **Create**, then the copy icon next to the token. Azure DevOps shows the token only
+      once — keep the dialog open until step 2 is done.
+
+   No **+ New Token** button, or the page is blocked? The org admin has restricted token
+   creation. Ask the project's Azure DevOps admin to allow it.
+2. Save the token once per organisation. Run this **yourself**, in your own terminal — not in
+   the Claude chat. Replace `<org>` with the real organisation name, for example
+   `-Collection https://dev.azure.com/contoso`:
    ```
-   powershell -ExecutionPolicy Bypass -File "<script path>" -Collection <collection URL> -SavePat
+   powershell -ExecutionPolicy Bypass -File "<script path>" -Collection https://dev.azure.com/<org> -SavePat
    ```
-3. First download (collection URL and server path as in step 1 of the `tf.exe` route):
+   At the `PAT for <org>` prompt, paste the token and press Enter. The script stores it
+   encrypted for your Windows user and never prints it.
+3. First download. The server path is under **Repos > Files** in the TFVC repository. The Azure
+   DevOps project name in the path can differ from the project's name (for example
+   `$/D365FO/Trunk/Main`), so check it there:
    ```
    powershell -ExecutionPolicy Bypass -File "<script path>" -Collection <collection URL> -ServerPath "<server path>" -LocalPath C:\Custom\<Project>
    ```
