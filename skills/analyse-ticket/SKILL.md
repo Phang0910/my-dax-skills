@@ -52,6 +52,28 @@ Then decide the route:
 asks, the timeline, which claims are checked and which are not, and what each screenshot shows
 (with its date format and environment).
 
+## Code readiness — checkpoint
+
+Now the customer is known. Find its standard and custom code with the first part of
+[`reference/code-search.md`](reference/code-search.md).
+
+- **Both found** → tell the user in one line which folders you will use, and continue.
+- **A piece is missing** → stop and ask once. Name the missing piece and what the analysis loses:
+
+  ```
+  Code not available: <missing piece>.
+  Without code, the analysis cannot check customizations or verify SQL field names.
+
+  → Set up first (recommended) — run /my-dax-skills:setup <customer>, then run this skill again
+  → Continue without code
+  ```
+
+  Fill in `<customer>` with the customer's name from the project map, so setup prepares exactly
+  this customer's code.
+
+  *Set up first* → stop here. *Continue without code* → the rest of the run is **without code**:
+  every step marked "Without code" below takes its fallback.
+
 ## Step 2 — Look for a known answer
 
 Run these before deep analysis. They are fast and often end the investigation.
@@ -80,6 +102,9 @@ dialog the user saw). One setup screenshot can replace many queries.
 **Done when** every customization on the path is listed with what it changes (or "no effect on
 the symptom"), and every hypothesis has its test.
 
+**Without code:** build the hypotheses from the ticket, Step 2 and the setup screenshots. Done
+when every hypothesis has its test. The output lists "customizations not checked" as an open risk.
+
 ## Step 4 — Check the real data in D365
 
 Use SQL Execute to see the records behind the ticket. Follow [`reference/sql-execute.md`](reference/sql-execute.md).
@@ -95,6 +120,8 @@ Use SQL Execute to see the records behind the ticket. Follow [`reference/sql-exe
 3. Run one discriminating query at a time. After each result, update the evidence level of every
    hypothesis it touches.
 
+**Without code:** verify table and field names with the fallback in `reference/sql-execute.md`.
+
 **Done when** every hypothesis is **supported** or removed, and each removal has its result.
 
 ## Step 5 — Reproduce the cause
@@ -103,6 +130,10 @@ When data and code support one cause, prove it in UAT. Give the user exact steps
 customer's code (mandatory fields, workflow stages, lookups) and from a known-good record of the
 same type (copy its dimensions and values). Give one test that produces the symptom and one
 opposite test that does not.
+
+**Without code:** take the values from a known-good record of the same type in UAT. Before you
+write the steps, ask the user once which custom mandatory fields and workflow stages that document
+type has.
 
 **Done when** the symptom is **reproduced**, and **confirmed** if the opposite test was run.
 If the user cannot run it now, stop at **supported** and say what is left.
@@ -124,7 +155,7 @@ Use this structure every time. The summary comes first and fits on one screen.
 ```
 Summary
 Problem:   <one sentence — what the user sees>
-Cause:     <one sentence> (<evidence level>)
+Cause:     <one sentence> (<evidence level>; add "code not checked" when without code)
 Action:    <the recommended action, one sentence>
 Next step: <one action, and who does it>
 
@@ -135,3 +166,14 @@ Details
 4. Options — table: action | effect | risk; the recommended option marked
 5. Handover — root cause, evidence, objects involved, chosen option, next skill
 ```
+
+## Missing setup
+
+Name the missing piece, and point the user to `/my-dax-skills:setup` to fix it. Then:
+
+| Missing or signed out | Do |
+|---|---|
+| Tracker connector | Stop. The ticket cannot be read. |
+| Browser (Claude in Chrome and the built-in browser) | Continue. Ask the user to paste each ticket image, and to run each SQL query and paste the result. |
+| DAXONET Notes or Microsoft Learn | Continue. Record the source as "not searched" in Step 2. |
+| Standard or custom code | The code readiness checkpoint. |

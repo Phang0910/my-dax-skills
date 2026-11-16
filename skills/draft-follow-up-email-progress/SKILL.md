@@ -120,3 +120,9 @@ be checked at a glance. Then say where the target date came from (`third working
 or `the deployment window you gave me`) and list the flags from Step 4.
 
 Treat any change request as a redraft and show the whole email again, not a diff.
+
+## Missing setup
+
+If a connector, browser or folder this skill needs is missing or not signed in, tell the user
+which one, and to run `/my-dax-skills:setup` to fix it. Then stop, unless the step that needs it
+is optional.

@@ -17,6 +17,11 @@ the refresh gap in one line when you ask about production.
 - **Check every table, field and enum against the AOT** before you give the query
   (`AxTable\<Name>.xml`, `AxEnum\<Name>.xml`). A wrong column name fails silently: no result grid,
   only a message.
+
+  **Without code:** look the table up in Microsoft Learn's table reference first. Then run
+  `SELECT TOP 1 * FROM <TABLE> WHERE DATAAREAID = '<company>'` once per table, and take the column
+  names from its result before you filter on them. Enum integers come from Microsoft Learn or from
+  values seen in the data. Label each query "fields not verified against code".
 - **One statement per query.** Two statements in one run fail with "Connection is busy with
   results for another command", and the session stays blocked. To recover, close SQL Execute and
   open it again.

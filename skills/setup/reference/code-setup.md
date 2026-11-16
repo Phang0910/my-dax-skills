@@ -1,6 +1,6 @@
-# analyse-ticket — one-time setup
+# Code setup — standard and custom D365FO code
 
-Do this once per PC before you use `analyse-ticket`. The skill reads two kinds of code:
+Do this once per PC. `analyse-ticket` reads two kinds of code:
 
 - **Standard code** — Microsoft's D365FO source, one folder per version, in `C:\D365Std`.
 - **Custom code** — each customer's own models, from that customer's Azure DevOps repo.
@@ -11,6 +11,11 @@ details.
 
 Both kinds of code are read-only for the skill. Microsoft source is licensed: keep it inside
 DAXONET and customer channels.
+
+**Easiest:** run `/my-dax-skills:setup` (standard code) or `/my-dax-skills:setup <customer>`
+(custom code) in Claude Code. Claude runs the extraction, the Git install and clone, and the TFVC
+download itself, and asks you only for sign-ins, the token and folder approvals. This page is the
+manual version of the same steps.
 
 ---
 
@@ -85,43 +90,66 @@ Sign in with the **customer's** Azure DevOps account. If you use a personal acce
 
 ### TFVC repos
 
-TFVC needs `tf.exe`, which comes with Visual Studio 2022 (any edition you are licensed for).
-Run the commands in **Developer PowerShell for VS 2022** (Start menu), where `tf` is ready to use.
+Two ways, depending on whether this PC has Visual Studio:
 
-1. In the customer's Azure DevOps portal, find:
-   - the **collection URL** — `https://dev.azure.com/<organisation>`
-   - the **server path** — **Repos > Files**, the TFVC repository, `Trunk/Main` (shown as
-     `$/<Project>/Trunk/Main`; the project map names the branch)
-2. Create a local workspace and get the code once:
+- **Visual Studio installed** (usually a developer VM) → in Visual Studio, open **Source Control
+  Explorer**, select the customer's branch (for example `$/MTM/Trunk/Main`), and click **Get
+  Latest Version**. Then add the mapped local folder to Claude (section 3). `analyse-ticket` gets
+  the latest changes itself before each analysis.
+- **No Visual Studio** → use the REST script, below.
+
+To find the **collection URL** and **server path** for the script: in the customer's Azure DevOps
+portal, the collection URL is `https://dev.azure.com/<organisation>`, and the server path is under
+**Repos > Files** in the TFVC repository (shown as `$/<Project>/Trunk/Main`; the project map names
+the branch).
+
+### TFVC without Visual Studio
+
+`scripts\Get-TfvcLatest.ps1` in the `setup` skill folder keeps the copy up to date through the
+Azure DevOps REST API. The first run downloads the branch as one zip. Later runs download only the
+files changed by newer changesets, and apply deletes and renames. Ask Claude for the script's full
+path on your PC — it is in the plugin folder.
+
+1. Create a **personal access token** in the customer's Azure DevOps: your profile picture >
+   **Personal access tokens** > **New Token**. Scope: **Code > Read** only. Pick an expiry date
+   and note it.
+2. Save the token once per organisation. Run this **yourself**, in your own terminal — it asks
+   for the token and stores it encrypted for your Windows user:
    ```
-   tf workspace /new <Customer>-ReadOnly /collection:<collection URL> /location:local /noprompt
-   tf workfold /unmap $/ /workspace:<Customer>-ReadOnly
-   tf workfold /map "<server path>" C:\Custom\<Customer> /workspace:<Customer>-ReadOnly
-   tf get C:\Custom\<Customer> /recursive
+   powershell -ExecutionPolicy Bypass -File "<script path>" -Collection <collection URL> -SavePat
    ```
-   The first `tf` command opens a browser sign-in. The `unmap $/` line removes a default root
-   mapping, so only the branch downloads. The first `get` takes a while.
-3. Get the latest changes:
+3. First download (collection URL and server path as in step 1 of the `tf.exe` route):
    ```
-   tf get C:\Custom\<Customer> /recursive
+   powershell -ExecutionPolicy Bypass -File "<script path>" -Collection <collection URL> -ServerPath "<server path>" -LocalPath C:\Custom\<Customer>
    ```
-4. Check the version:
+4. Get the latest changes — the folder remembers the collection and the server path:
    ```
-   tf history C:\Custom\<Customer> /recursive /stopafter:1 /noprompt
+   powershell -ExecutionPolicy Bypass -File "<script path>" -LocalPath C:\Custom\<Customer>
+   ```
+5. Check the version (changes nothing):
+   ```
+   powershell -ExecutionPolicy Bypass -File "<script path>" -LocalPath C:\Custom\<Customer> -Status
    ```
 
-Without Visual Studio there is no incremental update for TFVC. The fallback is to download the
-branch as a zip from the Azure DevOps portal each time.
+The last changeset is kept in `C:\Custom\<Customer>\.tfvc-latest.json`. When the token expires,
+the script says so; save a new one with step 2. Add `-Full` to step 4 to download the whole branch
+again, for example after a local file was changed by mistake.
 
 ---
 
 ## 3. Add the folders to Claude
 
-1. In the Claude app: **Edit environment > Folders > Add** — add `C:\D365Std` and `C:\Custom`.
-2. Start a new session.
+Add `C:\D365Std` and each custom code folder:
 
-The skill finds each customer's code by its signature models (project map). It tells you if a
-folder is missing and points you back to this page.
+- **Claude app, with an environment** → **Edit environment > Folders > Add**, then start a new
+  session. The folders stay for later sessions.
+- **Claude app, no environment** → approve the folder request when `/my-dax-skills:setup` asks.
+  Access works at once, for that session.
+- **Claude Code CLI** → type `/add-dir C:\D365Std` (and each custom folder), or start Claude with
+  `claude --add-dir C:\D365Std`.
+
+`analyse-ticket` finds each customer's code by its signature models (project map). Run
+`/my-dax-skills:setup` again to check that everything is found.
 
 ## Rules for these copies
 

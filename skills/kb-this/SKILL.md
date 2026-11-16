@@ -218,3 +218,9 @@ If the call fails, say so plainly and hand the user the local draft file so noth
 - **Retrying an oversized search** with a smaller limit instead of parsing the saved file.
 - **Writing the investigation instead of the fix.** If a line does not help the next person
   recognise or resolve the symptom, cut it.
+
+## Missing setup
+
+If a connector, browser or folder this skill needs is missing or not signed in, tell the user
+which one, and to run `/my-dax-skills:setup` to fix it. Then stop, unless the step that needs it
+is optional.

@@ -127,3 +127,9 @@ Resolution and Resolution Date. Once the draft is settled, say so in one line:
 
 One line, as an offer. Do not start closing the ticket yourself, and do not push it if the user is
 waiting on the customer to confirm closure first.
+
+## Missing setup
+
+If a connector, browser or folder this skill needs is missing or not signed in, tell the user
+which one, and to run `/my-dax-skills:setup` to fix it. Then stop, unless the step that needs it
+is optional.

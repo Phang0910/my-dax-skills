@@ -191,3 +191,9 @@ resolved. #19306 is the pattern.
 
 `Transferred` (13) and `KIV` (14) also close a ticket. Neither is this skill's job — if one of
 those is what the user actually wants, say so and let them do it in Tracker.
+
+## Missing setup
+
+If a connector, browser or folder this skill needs is missing or not signed in, tell the user
+which one, and to run `/my-dax-skills:setup` to fix it. Then stop, unless the step that needs it
+is optional.

@@ -117,3 +117,9 @@ Per goal: a blank line, then the bold goal label, then the table.
 ```
 
 The blank line above each goal label is deliberate breathing room. Full words with the first letter bold. The goal stays **above** the table — markdown has no colspan, so a merged full-width header row is not reachable through the API.
+
+## Missing setup
+
+If a connector, browser or folder this skill needs is missing or not signed in, tell the user
+which one, and to run `/my-dax-skills:setup` to fix it. Then stop, unless the step that needs it
+is optional.

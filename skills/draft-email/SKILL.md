@@ -190,3 +190,9 @@ Confirm in one line that the draft was created and that **it has not been sent**
 
 Never call `outlook_send_mail` or `outlook_send_draft`, even if the user says "send it" — tell them
 the draft is in their Outlook and they can review and send it there.
+
+## Missing setup
+
+If a connector, browser or folder this skill needs is missing or not signed in, tell the user
+which one, and to run `/my-dax-skills:setup` to fix it. Then stop, unless the step that needs it
+is optional.

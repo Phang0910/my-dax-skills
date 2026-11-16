@@ -84,3 +84,9 @@ Show the full draft in a code block with `Subject:`, `To:` and `Cc:` at the top 
 can be checked at a glance. Then list the flags from Step 3.
 
 Treat any change request as a redraft and show the whole email again, not a diff.
+
+## Missing setup
+
+If a connector, browser or folder this skill needs is missing or not signed in, tell the user
+which one, and to run `/my-dax-skills:setup` to fix it. Then stop, unless the step that needs it
+is optional.

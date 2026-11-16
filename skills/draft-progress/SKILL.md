@@ -193,3 +193,9 @@ from adding a note.
 
 Confirm back to the user in one line that it posted, naming the ticket. If the call fails, say so
 plainly and hand them the draft so nothing is lost.
+
+## Missing setup
+
+If a connector, browser or folder this skill needs is missing or not signed in, tell the user
+which one, and to run `/my-dax-skills:setup` to fix it. Then stop, unless the step that needs it
+is optional.

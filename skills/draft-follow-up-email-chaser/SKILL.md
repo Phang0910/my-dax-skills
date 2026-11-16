@@ -167,3 +167,9 @@ If Template B is going out, add one line: the next step after this is `draft-clo
 another chaser.
 
 Treat any change request as a redraft and show the whole email again, not a diff.
+
+## Missing setup
+
+If a connector, browser or folder this skill needs is missing or not signed in, tell the user
+which one, and to run `/my-dax-skills:setup` to fix it. Then stop, unless the step that needs it
+is optional.

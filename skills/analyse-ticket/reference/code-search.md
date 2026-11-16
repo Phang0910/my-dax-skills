@@ -7,24 +7,35 @@ unless it is already in your context. It maps each customer to its standard vers
 its custom code repo, and it has two readiness checks. Complete both checks before you read any
 code, and keep to the folders they select.
 
-**`C:\D365Std` does not exist** (a dev VM) → use the local installation:
+**`C:\D365Std` does not exist, and a local D365 installation does** (a dev VM) → use the local
+installation:
 
 | Code | Location |
 |---|---|
 | Customer customizations | The customer's repo folder in this environment, for example `C:\Project\<Customer>\Trunk\Main\Metadata\<Model>\<Model>\` |
 | Standard application | `C:\Users\<user>\AppData\Local\Microsoft\Dynamics365\<version>\PackagesLocalDirectory\` |
 
-**A readiness check fails** (no `C:\D365Std`, a missing version folder, or no custom code for the
-customer) → show the user the matching section of [`setup.md`](setup.md), then stop until the
-folder is added.
+**Neither exists, or a readiness check fails** (a missing version folder, or no custom code for
+the customer) → that piece is missing. Go to the code readiness checkpoint in `SKILL.md`.
 
 **Get the latest custom code** before you read it, and record the version in the Checks section
-of the output:
+of the output. Find the copy's type from the repo root of the custom code folder:
 
-- A read-only copy under `C:\Custom\` → update it yourself: `git -C <folder> pull --ff-only` for
-  Git, `tf get <folder> /recursive` for TFVC. The update commands are in `setup.md`.
-- A developer workspace (for example `C:\Project\<Customer>\Trunk\Main`) → ask the user before you
-  update it, because it can hold their pending changes.
+| The folder has | Type | Pending changes? | Update | Version |
+|---|---|---|---|---|
+| `.git\` | Git | `git -C <folder> status --porcelain` prints lines | `git -C <folder> pull --ff-only` | `git -C <folder> log -1 --format="%h %ad"` |
+| `.tfvc-latest.json` | TFVC via REST script | none — the copy is read-only | `powershell -ExecutionPolicy Bypass -File "<script>" -LocalPath <folder>` | the same with `-Status` |
+| neither | TFVC workspace | `"<tf.exe>" status <folder> /recursive` lists files | `"<tf.exe>" get <folder> /recursive` | `"<tf.exe>" history <folder> /recursive /stopafter:1 /noprompt` |
+
+- `<script>` is `..\setup\scripts\Get-TfvcLatest.ps1`, relative to this skill's folder.
+- `<tf.exe>` is the full path from
+  `& "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -find "Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team Explorer\tf.exe"`.
+  `tf` alone is not on the PATH of a normal shell.
+- No pending changes → update without asking. Pending changes (usually a developer workspace) →
+  ask the user before you update.
+- The update fails (expired token, sign-in prompt, no network) → continue on the current code, and
+  write in the output: "Custom code not updated — using <commit or changeset> from <date>".
+  Tell the user to run `/my-dax-skills:setup` when the cause is the sign-in or token.
 
 Both layouts are `<Package>\<Model>\Ax*\<Name>.xml` (for example `ApplicationSuite\Foundation\AxTable\PurchLine.xml`).
 Inside a model, each element is one XML file: `AxClass\<Name>.xml`, `AxTable\<Name>.xml`,
