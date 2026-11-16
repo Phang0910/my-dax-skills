@@ -33,7 +33,7 @@ large ones carry the evidence. Skip only images you have read on an earlier page
 
 - The document numbers, values and statuses it shows.
 - The **date format** of that user (D/M/YYYY or M/D/YYYY). Find it from a date that is not
-  ambiguous (for example 18/8/2026). Users at one customer can have different formats.
+  ambiguous (for example 18/8/2026). 
 - The **environment** (URL in the screenshot, or the user's statement).
 - Any value that disagrees with another image or with the ticket text. A mismatch is often the
   first clue.

@@ -15,6 +15,11 @@ and names the one test that would close the gap.
 Building the fix, writing test cases, the customer email and closing the ticket are other skills
 (`draft-email`, `draft-progress`, `close-ticket`, `kb-this`). Name the next one in the handover.
 
+**Terms.** A **project** is a DAXONET client engagement: one D365 environment and its code, one
+row in the project map (for example MTM); match the ticket's Tracker project to it. A **D365
+project** is a Projects module record (`ProjId`). A **legal entity** is the D365 company
+(`DATAAREAID`, `cmp=`). The **customer** is the people at the project who raised the ticket.
+
 ## Evidence levels
 
 Tag every finding with one level. Raise a level only on the evidence written beside it.
@@ -54,7 +59,7 @@ asks, the timeline, which claims are checked and which are not, and what each sc
 
 ## Code readiness — checkpoint
 
-Now the customer is known. Find its standard and custom code with the first part of
+Now the project is known. Find its standard and custom code with the first part of
 [`reference/code-search.md`](reference/code-search.md).
 
 - **Both found** → tell the user in one line which folders you will use, and continue.
@@ -64,12 +69,11 @@ Now the customer is known. Find its standard and custom code with the first part
   Code not available: <missing piece>.
   Without code, the analysis cannot check customizations or verify SQL field names.
 
-  → Set up first (recommended) — run /my-dax-skills:setup <customer>, then run this skill again
+  → Set up first (recommended) — run /my-dax-skills:setup-mydaxskills in this conversation, then run this skill again
   → Continue without code
   ```
 
-  Fill in `<customer>` with the customer's name from the project map, so setup prepares exactly
-  this customer's code.
+  Setup reads the project from this conversation's ticket, so the user types the command only.
 
   *Set up first* → stop here. *Continue without code* → the rest of the run is **without code**:
   every step marked "Without code" below takes its fallback.
@@ -78,7 +82,7 @@ Now the customer is known. Find its standard and custom code with the first part
 
 Run these before deep analysis. They are fast and often end the investigation.
 
-- **DAXONET Notes** — search past KB articles for the symptom, error text and customer:
+- **DAXONET Notes** — search past KB articles for the symptom, error text and project:
   `mcp__claude_ai_DAXONET_Notes__list_documents(query: "...")`. Large results go to a file; read
   the file.
 - **Microsoft Learn** — standard behaviour and setup: `mcp__claude_ai_Microsoft_Learn__microsoft_docs_search`.
@@ -93,7 +97,7 @@ recorded with its link.
 List every candidate cause at level **hypothesis**. For each one, write the test that would prove
 or remove it.
 
-Read the code on the business path of the symptom: the customer's extensions first, then the
+Read the code on the business path of the symptom: the project's extensions first, then the
 standard methods they extend or call. Follow [`reference/code-search.md`](reference/code-search.md).
 
 Ask the user early for screenshots of the setup pages on that path (parameters, policies, the
@@ -127,7 +131,7 @@ Use SQL Execute to see the records behind the ticket. Follow [`reference/sql-exe
 ## Step 5 — Reproduce the cause
 
 When data and code support one cause, prove it in UAT. Give the user exact steps built from the
-customer's code (mandatory fields, workflow stages, lookups) and from a known-good record of the
+project's code (mandatory fields, workflow stages, lookups) and from a known-good record of the
 same type (copy its dimensions and values). Give one test that produces the symptom and one
 opposite test that does not.
 
@@ -169,7 +173,7 @@ Details
 
 ## Missing setup
 
-Name the missing piece, and point the user to `/my-dax-skills:setup` to fix it. Then:
+Name the missing piece, and point the user to `/my-dax-skills:setup-mydaxskills` to fix it. Then:
 
 | Missing or signed out | Do |
 |---|---|

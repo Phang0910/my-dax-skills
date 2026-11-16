@@ -222,5 +222,5 @@ If the call fails, say so plainly and hand the user the local draft file so noth
 ## Missing setup
 
 If a connector, browser or folder this skill needs is missing or not signed in, tell the user
-which one, and to run `/my-dax-skills:setup` to fix it. Then stop, unless the step that needs it
+which one, and to run `/my-dax-skills:setup-mydaxskills` to fix it. Then stop, unless the step that needs it
 is optional.

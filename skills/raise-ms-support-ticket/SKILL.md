@@ -351,5 +351,5 @@ Confirm in one line that the field is set, and stop. The job is done.
 ## Missing setup
 
 If a connector, browser or folder this skill needs is missing or not signed in, tell the user
-which one, and to run `/my-dax-skills:setup` to fix it. Then stop, unless the step that needs it
+which one, and to run `/my-dax-skills:setup-mydaxskills` to fix it. Then stop, unless the step that needs it
 is optional.

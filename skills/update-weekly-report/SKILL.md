@@ -121,5 +121,5 @@ The blank line above each goal label is deliberate breathing room. Full words wi
 ## Missing setup
 
 If a connector, browser or folder this skill needs is missing or not signed in, tell the user
-which one, and to run `/my-dax-skills:setup` to fix it. Then stop, unless the step that needs it
+which one, and to run `/my-dax-skills:setup-mydaxskills` to fix it. Then stop, unless the step that needs it
 is optional.

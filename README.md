@@ -23,18 +23,18 @@ Then restart Claude Code. Skills are invoked namespaced by the plugin:
 Run this once after install, and again whenever a skill tells you to:
 
 ```
-/my-dax-skills:setup
-/my-dax-skills:setup MTM
+/my-dax-skills:setup-mydaxskills
 ```
 
-The first form checks the connectors, the browser and the standard D365FO code. Add a customer
-to also set up that customer's custom code. It shows one checklist, does what it can itself, and
-guides you through the rest. Every other skill sends you here when it finds a missing piece, so
+It checks the connectors, the browser and the standard D365FO code — the same for everyone. Custom
+code is optional: it lists every project, and you pick the ones you work on, or none. In a
+conversation about a ticket, it sets up that ticket's project by itself — you never type a
+project. It shows one checklist, does what it can itself, and guides you through the rest. Every other skill sends you here when it finds a missing piece, so
 setup steps live in one place.
 
 ## What each skill needs
 
-`/my-dax-skills:setup` checks all of these for you. This table is only so you know what a prompt
+`/my-dax-skills:setup-mydaxskills` checks all of these for you. This table is only so you know what a prompt
 is asking for.
 
 | Skill | Needs | If it's missing |
@@ -42,7 +42,7 @@ is asking for.
 | everything | the **Tracker** connector | enable it in Claude settings → Connectors |
 | `update-weekly-report`, `kb-this` | the **DAXONET Notes** connector | same place |
 | `raise-ms-support-ticket` | **Claude in Chrome** (optional) | take the guide-pack path instead — it needs no browser at all |
-| `analyse-ticket` | **Claude in Chrome** or the built-in browser, for ticket images and SQL Execute; **DAXONET Notes** and **Microsoft Learn** for known answers; the standard and custom code folders ([code setup](skills/setup/reference/code-setup.md)) | it falls back to the built-in browser on its own; without a browser it asks you to run the SQL and paste the images; without the code folders it pauses and asks: run `setup` first (recommended), or continue without code, with every code check marked "not checked" |
+| `analyse-ticket` | **Claude in Chrome** or the built-in browser, for ticket images and SQL Execute; **DAXONET Notes** and **Microsoft Learn** for known answers; the standard and custom code folders ([code setup](skills/setup-mydaxskills/reference/code-setup.md)) | it falls back to the built-in browser on its own; without a browser it asks you to run the SQL and paste the images; without the code folders it pauses and asks: run `setup-mydaxskills` first (recommended), or continue without code, with every code check marked "not checked" |
 | `update-es-weekly-sheet` | **Claude Code**, plus the SharePoint folder synced | it checks first and tells you to switch, and gives you one link + **Sync** for the folder; writes go through your desktop Excel |
 
 The two person-scoped skills — `update-weekly-report` and `update-es-weekly-sheet` — default to **you**, resolved from your Tracker account rather than a name baked into the skill. Pass
@@ -54,7 +54,7 @@ Only `update-es-weekly-sheet` is Claude Code-only — it edits the workbook on y
 
 | Skill | What it does |
 |---|---|
-| `setup` | Checks everything the plugin needs on this PC — connectors, browser, standard D365FO code, and one customer's custom code when you name it — then sets up what it can and guides you through the rest. Run it by name; it never starts on its own. |
+| `setup-mydaxskills` | Checks everything the plugin needs on this PC — connectors, browser, standard D365FO code, and optionally the projects' custom code you pick — then sets up what it can and guides you through the rest. Run it by name; it never starts on its own. |
 | `analyse-ticket` | Analyses a ticket to its root cause — reads every journal and image, checks known answers, the custom and standard code, and the real data through SQL Execute (UAT first), then proposes the fix, workaround or setup change. |
 | `draft-progress` | Drafts a short progress/completion note for a Tracker (Redmine) ticket in the house format, shows it with the ticket number for confirmation, then posts it to the ticket. |
 | `draft-email` | Drafts a reply email to a customer or vendor in the house style, then hands it back for you to review and send yourself. |
@@ -68,7 +68,7 @@ Only `update-es-weekly-sheet` is Claude Code-only — it edits the workbook on y
 | `update-es-weekly-sheet` | Fills a week's column in the ES Weekly Update team tracker spreadsheet from the Tracker — splits your open issues across the In Progress / In Review / Closed rows and writes the per-ticket Excel cell notes. |
 | `kb-this` | Writes a knowledge base article about a resolved case and publishes it to DAXONET Notes under the customer's KB page, in the house format. |
 
-### setup
+### setup-mydaxskills
 
 One command that answers "is this PC ready?". It runs every check first, then shows a single
 checklist — ✅ ready, ❌ missing or sign-in needed, ⏸ optional, ➖ checked by its own skill — with
@@ -77,25 +77,29 @@ fix; choosing it is your agreement. It re-checks the item when done and offers t
 
 It checks the Tracker, DAXONET Notes, Microsoft Learn and Microsoft 365 connectors (a cheap read
 call each, so "connected but signed out" shows as such), Claude in Chrome and the built-in browser,
-and — in Claude Code — the standard code in `C:\D365Std`. With a customer name it also checks that
-customer's custom code and the Git or TFVC tools it needs. Customers come from the ticket:
-`analyse-ticket` sends you to `setup <customer>` for exactly the customer it needs.
+and — in Claude Code — the standard code in `C:\D365Std`. Those are the required rows.
+
+Custom code is a separate, optional list: one row per project in the project map, showing which
+are already set up. You can set up any of them, several, or none — the plugin is ready either way,
+and `analyse-ticket` offers a project's setup when a ticket for it comes in. When the
+conversation already has a ticket, that ticket's project becomes a required row, matched from its
+Tracker project, so you never type it.
 
 **Claude does:** the checks, extracting `D365Std.zip` to `C:\`, installing Git with winget, cloning
-a Git customer, the TFVC download without Visual Studio, and asking for folder access.
+a Git project, the TFVC download without Visual Studio, and asking for folder access.
 **You do:** sign-ins, connecting connectors, the Chrome extension, the zip download link, approving
 folder access, and — on a Visual Studio machine — **Get Latest Version** in Source Control Explorer.
 
 For TFVC without Visual Studio, the bundled
-[`Get-TfvcLatest.ps1`](skills/setup/scripts/Get-TfvcLatest.ps1) uses a read-only token that you
+[`Get-TfvcLatest.ps1`](skills/setup-mydaxskills/scripts/Get-TfvcLatest.ps1) uses a read-only token that you
 save once **in your own terminal** — the token never enters the chat. The manual steps for
-everything are in [`code-setup.md`](skills/setup/reference/code-setup.md).
+everything are in [`code-setup.md`](skills/setup-mydaxskills/reference/code-setup.md).
 
 ### analyse-ticket
 
-**Before first use**, run `/my-dax-skills:setup`. When a ticket's customer has no custom code on
-this PC yet, the skill pauses and offers `/my-dax-skills:setup <customer>`, or continuing without
-code.
+**Before first use**, run `/my-dax-skills:setup-mydaxskills`. When a ticket's project has no custom code on
+this PC yet, the skill pauses and offers to run `/my-dax-skills:setup-mydaxskills` in the same
+conversation (it picks up the project from the ticket), or to continue without code.
 
 Takes a ticket from "what is wrong" to a proven root cause and a proposed action, and stops there.
 Building the fix, the customer email and closing the ticket are the other skills.
@@ -105,7 +109,7 @@ files open in **Claude in Chrome**, or the built-in browser if Chrome is not con
 connector cannot see them, and on #19264 the first clue was in a screenshot.
 
 It checks for a known answer first (DAXONET Notes KBs, Microsoft Learn), then reads the
-customer's extensions and the standard code on the symptom path, and asks early for setup
+project's extensions and the standard code on the symptom path, and asks early for setup
 screenshots.
 
 Data is checked in **UAT first** through SQL Execute. Only when UAT does not have the ticket's
@@ -356,8 +360,8 @@ description: <when Claude should use this skill>
 ```
 
 End the skill with the standard `## Missing setup` section (copy it from any existing skill), and
-add any new connector, tool or folder it needs to the checks in `skills/setup/SKILL.md`. Setup
-steps live only in `setup`; skills point to it.
+add any new connector, tool or folder it needs to the checks in `skills/setup-mydaxskills/SKILL.md`. Setup
+steps live only in `setup-mydaxskills`; skills point to it.
 
 Then **bump `version` in `.claude-plugin/plugin.json`** — this step is not optional. The plugin
 cache is keyed by version (`~/.claude/plugins/cache/my-dax-skills/my-dax-skills/<version>/`), so

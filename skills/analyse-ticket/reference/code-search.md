@@ -3,7 +3,7 @@
 ## Where the code is
 
 **`C:\D365Std` exists** (the shared standard-source export) → read `C:\D365Std\CLAUDE.md` now,
-unless it is already in your context. It maps each customer to its standard version folder and
+unless it is already in your context. It maps each project to its standard version folder and
 its custom code repo, and it has two readiness checks. Complete both checks before you read any
 code, and keep to the folders they select.
 
@@ -12,11 +12,11 @@ installation:
 
 | Code | Location |
 |---|---|
-| Customer customizations | The customer's repo folder in this environment, for example `C:\Project\<Customer>\Trunk\Main\Metadata\<Model>\<Model>\` |
+| Project customizations | The project's repo folder in this environment, for example `C:\Project\<Project>\Trunk\Main\Metadata\<Model>\<Model>\` |
 | Standard application | `C:\Users\<user>\AppData\Local\Microsoft\Dynamics365\<version>\PackagesLocalDirectory\` |
 
 **Neither exists, or a readiness check fails** (a missing version folder, or no custom code for
-the customer) → that piece is missing. Go to the code readiness checkpoint in `SKILL.md`.
+the project) → that piece is missing. Go to the code readiness checkpoint in `SKILL.md`.
 
 **Get the latest custom code** before you read it, and record the version in the Checks section
 of the output. Find the copy's type from the repo root of the custom code folder:
@@ -27,7 +27,7 @@ of the output. Find the copy's type from the repo root of the custom code folder
 | `.tfvc-latest.json` | TFVC via REST script | none — the copy is read-only | `powershell -ExecutionPolicy Bypass -File "<script>" -LocalPath <folder>` | the same with `-Status` |
 | neither | TFVC workspace | `"<tf.exe>" status <folder> /recursive` lists files | `"<tf.exe>" get <folder> /recursive` | `"<tf.exe>" history <folder> /recursive /stopafter:1 /noprompt` |
 
-- `<script>` is `..\setup\scripts\Get-TfvcLatest.ps1`, relative to this skill's folder.
+- `<script>` is `..\setup-mydaxskills\scripts\Get-TfvcLatest.ps1`, relative to this skill's folder.
 - `<tf.exe>` is the full path from
   `& "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -find "Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team Explorer\tf.exe"`.
   `tf` alone is not on the PATH of a normal shell.
@@ -35,7 +35,7 @@ of the output. Find the copy's type from the repo root of the custom code folder
   ask the user before you update.
 - The update fails (expired token, sign-in prompt, no network) → continue on the current code, and
   write in the output: "Custom code not updated — using <commit or changeset> from <date>".
-  Tell the user to run `/my-dax-skills:setup` when the cause is the sign-in or token.
+  Tell the user to run `/my-dax-skills:setup-mydaxskills` when the cause is the sign-in or token.
 
 Both layouts are `<Package>\<Model>\Ax*\<Name>.xml` (for example `ApplicationSuite\Foundation\AxTable\PurchLine.xml`).
 Inside a model, each element is one XML file: `AxClass\<Name>.xml`, `AxTable\<Name>.xml`,
@@ -43,7 +43,7 @@ Inside a model, each element is one XML file: `AxClass\<Name>.xml`, `AxTable\<Na
 
 ## Search method
 
-- **Customizations first.** In the customer model, find the extensions on the path:
+- **Customizations first.** In the project model, find the extensions on the path:
   `[ExtensionOf(classStr(X))]`, `[ExtensionOf(tableStr(X))]`, form extensions, event handlers.
   For each one, write what it changes — or "no effect on the symptom".
 - **Then the standard code** that those extensions wrap, and the standard methods the symptom
