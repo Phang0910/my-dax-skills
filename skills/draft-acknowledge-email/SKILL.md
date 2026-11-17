@@ -35,6 +35,8 @@ default to the user.
 
 ## Step 2 — The acknowledgement format
 
+Before you write any free text, read [`../draft-email/reference/ai-tells.md`](../draft-email/reference/ai-tells.md) (AI tells to avoid). It never changes the fixed template lines below.
+
 The two detail fields run as **one compact block with no blank line between them** — circulating
 copies of this template space them out, but the compact run matches the verified closure format
 in `draft-closing-email`. Ask the user before spacing them.

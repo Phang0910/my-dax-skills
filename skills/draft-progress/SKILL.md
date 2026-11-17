@@ -140,6 +140,8 @@ matter more than brevity. An explanation that has to be re-read twice is not sho
 
 ### Rules
 
+Before you write any free text, read [`../draft-email/reference/ai-tells.md`](../draft-email/reference/ai-tells.md) (AI tells to avoid). It never changes the fixed template lines below.
+
 The audience is a project manager or functional consultant, not a developer.
 
 **Leave out** unless the user explicitly asks:

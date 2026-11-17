@@ -42,6 +42,8 @@ user's summary alone.** From the ticket, establish:
 
 ## Step 2 — The closure format
 
+Before you write any free text, read [`../draft-email/reference/ai-tells.md`](../draft-email/reference/ai-tells.md) (AI tells to avoid). It never changes the fixed template lines below.
+
 This is the format actually in use (verified against sent closures, e.g. ticket #18885).
 The detail fields run as **one compact block with no blank lines between them**:
 

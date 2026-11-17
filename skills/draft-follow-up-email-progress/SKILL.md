@@ -38,6 +38,8 @@ wording, not a customer sentence.
 
 ## Step 2 — The template
 
+Before you write any free text, read [`../draft-email/reference/ai-tells.md`](../draft-email/reference/ai-tells.md) (AI tells to avoid). It never changes the fixed template lines below.
+
 ```
 Dear <Name>,
 

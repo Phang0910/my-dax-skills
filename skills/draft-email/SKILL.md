@@ -160,6 +160,8 @@ DAXONET Customer Success
 - Build logs, warning counts, correlation IDs (unless a vendor asked for one)
 - "I have successfully…", "Please be informed that…", "Kindly be advised"
 - Restating their whole question back at them before answering it
+- Wording from the AI-tells list in [`reference/ai-tells.md`](reference/ai-tells.md) — read it before
+  writing the body. It never changes the fixed lines (`Do let me know...`, `Thank you.`, sign-off).
 
 ## Step 4 — Hand it back
 

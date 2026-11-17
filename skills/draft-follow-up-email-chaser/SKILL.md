@@ -64,6 +64,8 @@ Notes on the cadence:
 
 ## Step 3 — The templates
 
+Before you write any free text, read [`../draft-email/reference/ai-tells.md`](../draft-email/reference/ai-tells.md) (AI tells to avoid). It never changes the fixed template lines below.
+
 Wrap every template in the house salutation and sign-off. Keep the body wording as it stands —
 these are standing templates, not prose to improve.
 
