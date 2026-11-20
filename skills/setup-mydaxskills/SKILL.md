@@ -137,11 +137,58 @@ Fix the chosen item only. When the user has a part to do, give it in short steps
 | Git missing | Install it: `winget install --id Git.Git -e --silent --accept-package-agreements --accept-source-agreements`. Open a new shell (or refresh `PATH`) and run `git --version`. | — |
 | Git project's custom code | Clone it: `git clone "<repo URL>" C:\Custom\<Project>`. Then add the folder (row above). | Sign in with the project's Azure DevOps account when the Git Credential Manager window opens. |
 | TFVC project, Visual Studio installed | Tell the user what to do (right column), then check the folder. | In Visual Studio: **Source Control Explorer** > the project's `<server path>` > **Get Latest Version**. Say which local folder it maps to. |
-| TFVC project, no Visual Studio | Explain the token step. When the token is saved, run the first download with `scripts\Get-TfvcLatest.ps1` in this skill's folder ([`reference/code-setup.md`](reference/code-setup.md), "TFVC without Visual Studio"), then add the folder. | Create a PAT and save it, following steps 1–2 of "TFVC without Visual Studio" in [`reference/code-setup.md`](reference/code-setup.md). Give them those steps in full: the tokens link, the **User settings** icon (not the profile picture), and the field-by-field table (Name, Organization, Expiration, Scopes = **Code > Read** only). First ask for the organisation (the `<org>` in their Azure DevOps address bar), then give the `-SavePat` command with the full script path and the real org filled in — never a `<org>` placeholder. They run it **in their own terminal** and paste the token at its prompt. |
+| TFVC project, no Visual Studio | Send the token guide below in **one message**. When the user says done, run the first download with `scripts\Get-TfvcLatest.ps1` ([`reference/code-setup.md`](reference/code-setup.md), "TFVC without Visual Studio"), then add the folder. | Create the token and save it with the script, following the guide. |
+
+### Token guide (TFVC without Visual Studio)
+
+Do not ask for the organisation name first. Send the whole guide at once, filled in for this
+project, and wait for "done".
+
+**Before you write it**, look for the project's organisation yourself: the project map, the
+project's `.sln` files on this PC (`https://dev.azure.com/<org>` inside them), or memory. Found →
+use it in the link and in the command. Not found → use the fallback link and the command without
+`-Collection`; the script asks for the browser address and reads the organisation from it.
+
+Write it like this (fill in every `<…>`; never leave a placeholder):
+
+```
+Set up <Project> custom code — about 3 minutes
+
+1. Open <Project>'s code in Azure DevOps and sign in with your <Project> account:
+   <https://dev.azure.com/<org>/<ADO project>/_versionControl>
+   (Not sure? Open https://aex.dev.azure.com/me, click <Project>'s organisation, then Repos.)
+2. Top right, click the User settings icon — a person with a small gear, left of your
+   profile picture (not the picture itself). Click Personal access tokens.
+3. Click + New Token and fill in:
+   | Field        | Fill in                                                   |
+   | Name         | Claude TFVC read                                          |
+   | Organization | leave as shown                                            |
+   | Expiration   | 90 days (or the longest it allows)                        |
+   | Scopes       | Custom defined → Code → tick Read only. Nothing else.     |
+4. Click Create, then the copy icon next to the token. Keep this page open.
+5. Open PowerShell (Start → type PowerShell → Enter) and paste this line:
+
+   powershell -ExecutionPolicy Bypass -File "<full script path>" -SavePat[ -Collection https://dev.azure.com/<org>]
+
+   [Without -Collection: when it asks for the address, go back to the browser, copy the
+   address bar, and paste it.]
+   When it asks for the token, paste it (it stays hidden) and press Enter.
+6. When it prints "OK - the token works", come back here and type done.
+```
+
+- `<full script path>` is the real path of `scripts\Get-TfvcLatest.ps1` in this skill's folder.
+- **Claude app with a Terminal panel** (`mcp__terminal__run_in_terminal` is available): you can
+  open the command in a new Terminal tab for the user instead of step 5's "open PowerShell". The
+  user still types the token into that tab. Never read that tab while the token prompt is open.
+- No **+ New Token** button, or the page is blocked → the project's Azure DevOps admin has
+  restricted tokens. Tell the user to ask that admin.
+- The script prints an error → read it, fix the cause (wrong organisation, wrong scope), and send
+  only the step that changes.
 
 The token stays out of the conversation: the user pastes it only into the script's own prompt,
 the script stores it encrypted for that Windows user, and the script never prints it. When a user
-offers a token in chat, explain this and send them to the `-SavePat` command instead.
+offers a token in chat, tell them not to. If they already pasted it, ask them to revoke it on the
+Personal access tokens page and create a new one, then send them to step 5.
 
 A connector change takes effect in a **new session**. A folder granted with `request_directory`
 works at once.

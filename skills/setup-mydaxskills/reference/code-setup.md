@@ -112,11 +112,11 @@ files changed by newer changesets, and apply deletes and renames. Ask Claude for
 path on your PC — it is in the plugin folder.
 
 1. Create a **personal access token (PAT)** in the project's Azure DevOps:
-   1. Open `https://dev.azure.com/<org>/_usersSettings/tokens`. `<org>` is the organisation
-      name in the address bar of the project's Azure DevOps (`https://dev.azure.com/<org>/...`).
-      To list the organisations your account can open, go to https://aex.dev.azure.com/me.
-      From the menus: the **User settings** icon (a person with a small gear, top right, left of
-      your profile picture — not the profile picture itself) > **Personal access tokens**.
+   1. Open the project's code in Azure DevOps (**Repos > Files**) and sign in with the project's
+      account. Not sure where it is? https://aex.dev.azure.com/me lists the organisations your
+      account can open. Then click the **User settings** icon (a person with a small gear, top
+      right, left of your profile picture — not the profile picture itself) > **Personal access
+      tokens**.
    2. Click **+ New Token** and fill in the dialog:
 
       | Field | Fill in |
@@ -131,14 +131,17 @@ path on your PC — it is in the plugin folder.
 
    No **+ New Token** button, or the page is blocked? The org admin has restricted token
    creation. Ask the project's Azure DevOps admin to allow it.
-2. Save the token once per organisation. Run this **yourself**, in your own terminal — not in
-   the Claude chat. Replace `<org>` with the real organisation name, for example
-   `-Collection https://dev.azure.com/contoso`:
+2. Save the token once per organisation. Run this **yourself**, in PowerShell — not in the
+   Claude chat:
    ```
-   powershell -ExecutionPolicy Bypass -File "<script path>" -Collection https://dev.azure.com/<org> -SavePat
+   powershell -ExecutionPolicy Bypass -File "<script path>" -SavePat
    ```
-   At the `PAT for <org>` prompt, paste the token and press Enter. The script stores it
-   encrypted for your Windows user and never prints it.
+   - At the address prompt, paste the browser's address bar from step 1. The script reads the
+     organisation from it. (Or add `-Collection https://dev.azure.com/<org>` to skip this prompt.)
+   - At the token prompt, paste the token (it stays hidden) and press Enter.
+
+   The script tests the token, stores it encrypted for your Windows user, and never prints it.
+   It ends with "OK - the token works", or says what to fix.
 3. First download. The server path is under **Repos > Files** in the TFVC repository. The Azure
    DevOps project name in the path can differ from the project's name (for example
    `$/D365FO/Trunk/Main`), so check it there:

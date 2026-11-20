@@ -41,9 +41,22 @@ $StateName = '.tfvc-latest.json'
 $PatDir = Join-Path $env:LOCALAPPDATA 'my-dax-skills'
 
 function Get-OrgName([string]$url) {
-    $u = [Uri]$url.TrimEnd('/')
+    $u = [Uri]$url.Trim().TrimEnd('/')
     if ($u.Host -like '*.visualstudio.com') { return $u.Host.Split('.')[0] }
-    return $u.Segments[-1].Trim('/')
+    # https://dev.azure.com/<org>/<project>/... — the organisation is the first path segment.
+    return $u.Segments[1].Trim('/')
+}
+
+# Any Azure DevOps address (copied from the browser) -> the collection URL https://dev.azure.com/<org>.
+function ConvertTo-CollectionUrl([string]$address) {
+    $a = $address.Trim().Trim('"')
+    if ($a -notmatch '^https?://') { $a = "https://$a" }
+    $u = [Uri]$a
+    if ($u.Host -like '*.visualstudio.com') { return "https://dev.azure.com/$($u.Host.Split('.')[0])" }
+    if ($u.Host -ne 'dev.azure.com' -or $u.Segments.Count -lt 2) {
+        throw "That is not an Azure DevOps address. Copy the address bar while the project's Azure DevOps page is open (it starts with https://dev.azure.com/)."
+    }
+    return "https://dev.azure.com/$($u.Segments[1].Trim('/'))"
 }
 
 function Get-PatFile([string]$url) { Join-Path $PatDir ("azdo-pat-{0}.xml" -f (Get-OrgName $url)) }
@@ -196,12 +209,27 @@ function Invoke-Incremental([int]$from, [int]$to, [hashtable]$headers) {
 # ---- main ----
 
 if ($SavePat) {
-    if (-not $Collection) { throw 'Give -Collection (for example https://dev.azure.com/contoso).' }
-    if ($Collection -match '[<>]') { throw "Replace <org> in -Collection with the organisation name from the Azure DevOps address bar (https://dev.azure.com/<org>)." }
+    if ($Collection -match '[<>]') { $Collection = $null }
+    if (-not $Collection) {
+        $Collection = ConvertTo-CollectionUrl (Read-Host "Paste the address from the browser (the Azure DevOps page you have open)")
+    } else {
+        $Collection = ConvertTo-CollectionUrl $Collection
+    }
+    $org = Get-OrgName $Collection
+    Write-Host "Organisation: $org"
     New-Item -ItemType Directory -Path $PatDir -Force | Out-Null
-    $secure = Read-Host "PAT for $(Get-OrgName $Collection) (Code: Read scope)" -AsSecureString
+    $secure = Read-Host "Paste the token for $org (it stays hidden), then press Enter" -AsSecureString
+    if ($secure.Length -eq 0) { throw 'No token pasted. Run the command again.' }
     $secure | Export-Clixml (Get-PatFile $Collection)
-    Write-Host "Saved, encrypted for $env:USERNAME, at $(Get-PatFile $Collection)."
+
+    # Check the token with one read call that needs Code (Read) only.
+    try {
+        $null = Invoke-Api 'tfvc/changesets?$top=1' (Get-AuthHeader $Collection)
+        Write-Host "OK - the token works for $org. Saved, encrypted for $env:USERNAME. Go back to Claude and say done."
+    } catch {
+        Remove-Item (Get-PatFile $Collection) -Force -ErrorAction SilentlyContinue
+        throw "Azure DevOps did not accept the token for $org. Check that it was created in this organisation with Code > Read, then run the command again. ($($_.Exception.Message))"
+    }
     return
 }
 
