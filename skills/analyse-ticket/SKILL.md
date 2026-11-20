@@ -33,6 +33,10 @@ attachments you chose, the code you read, search results with no match, every qu
 result. Keep them to yourself. Between steps, write at most one short line on what you are doing
 now. Do not repeat the ticket back to the user.
 
+Never mention your own tools or mechanics: hooks, permission prompts, tool names, skill files,
+ToolSearch, "the command hook needs…". If a hook or tool blocks you, handle it quietly; tell the
+user only what they must do.
+
 ## Evidence levels (your notes)
 
 Track one level for every finding. Raise a level only on evidence you have.
@@ -79,26 +83,46 @@ it.
 customer asks, the timeline, which claims are checked and which are not, and what the screenshots
 show (with their date format and environment).
 
-## Code readiness — checkpoint
+## Sort the ticket
 
-Now the project is known. Find its standard and custom code with the first part of
+Decide from the ticket text and screenshots whether the cause can be in code. Do not tell the user
+the type; it only decides your route.
+
+| Type | Signs | Code |
+|---|---|---|
+| **Setup** | "how do I…", parameters, number sequences, posting profiles, workflow setup, security roles | Not needed |
+| **Data or user error** | wrong values on one document, wrong order of steps, a duplicate | Not needed — SQL and screenshots |
+| **Standard behaviour** | "why does D365 do X", same as standard | Standard code only if Microsoft Learn does not explain it |
+| **Customization or bug** | a custom feature, field, menu or report, an integration, an error from custom code, "it worked before the deployment" | **Custom code required** |
+
+- **Not needed** → skip the code readiness checkpoint and Step 3's code reading. Go to Step 2,
+  then Step 4. Build hypotheses from setup, data and Microsoft Learn.
+- If evidence later points to code (a custom object in an error, behaviour standard cannot
+  explain), run the code readiness checkpoint at that point.
+- Unsure → treat it as **Customization or bug**.
+
+## Code readiness — checkpoint (code tickets only)
+
+Find the project's standard and custom code with the first part of
 [`reference/code-search.md`](reference/code-search.md).
 
 - **Both found** → continue. Do not tell the user the folders.
-- **A piece is missing** → stop and ask once. Name the missing piece and what the analysis loses:
+- **A piece is missing** → set it up now, in this run. Do not send the user to another command,
+  and do not ask them to run this skill again.
+  1. Read `..\setup-mydaxskills\SKILL.md` (relative to this skill's folder): its Step 3 row for
+     the missing piece, and the **Token guide** for a TFVC project without Visual Studio. Do the
+     part marked "You do" yourself.
+  2. Send the user their part in the **same message** as any other open question (for example a
+     Tracker sign-in). For custom code, that is the filled-in token guide or Git sign-in, with no
+     placeholders. Add one line: "I need the code to find the cause. I'll continue as soon as you
+     type done." Offer "Continue without code" as a second choice, for when access is not possible.
+  3. While you wait, do the work that needs no code: read the screenshots, run Step 2. **Draw no
+     conclusion about the cause yet.**
+  4. On "done": run setup's check for that piece, download the code, add the folder, and continue
+     with Step 3 of this analysis.
 
-  ```
-  Code not available: <missing piece>.
-  Without code, the analysis cannot check customizations or verify SQL field names.
-
-  → Set up first (recommended) — run /my-dax-skills:setup-mydaxskills in this conversation, then run this skill again
-  → Continue without code
-  ```
-
-  Setup reads the project from this conversation's ticket, so the user types the command only.
-
-  *Set up first* → stop here. *Continue without code* → the rest of the run is **without code**:
-  every step marked "Without code" below takes its fallback.
+  *Continue without code* → the rest of the run is **without code**: every step marked "Without
+  code" below takes its fallback.
 
 ## Step 2 — Look for a known answer
 
@@ -131,6 +155,9 @@ test.
 **Without code:** build the hypotheses from the ticket, Step 2 and the setup screenshots. Done
 when every hypothesis has its test. The output says "customizations not checked".
 
+**Not a code ticket** (Sort the ticket): list the hypotheses and their tests only, and skip the code
+reading. The output does not say "customizations not checked".
+
 ## Step 4 — Check the real data in D365
 
 Use SQL Execute to see the records behind the ticket. Follow [`reference/sql-execute.md`](reference/sql-execute.md).
@@ -153,6 +180,8 @@ Use SQL Execute to see the records behind the ticket. Follow [`reference/sql-exe
    run the queries, do not show each result to the user.
 
 **Without code:** verify table and field names with the fallback in `reference/sql-execute.md`.
+**Not a code ticket:** verify them against the standard code if it is on this PC (no setup
+needed for this), else use the same fallback.
 
 **Done when** every hypothesis is **supported** or removed by a result.
 
@@ -221,4 +250,4 @@ Name the missing piece, and point the user to `/my-dax-skills:setup-mydaxskills`
 | Tracker connector | Stop. The ticket cannot be read. |
 | Browser (Claude in Chrome and the built-in browser) | Continue. Ask the user to paste each ticket image you need, and to run each SQL query and paste the result. |
 | DAXONET Notes or Microsoft Learn | Continue. Add "Not searched: <source>" under For the developer. |
-| Standard or custom code | The code readiness checkpoint. |
+| Standard or custom code | Code tickets only: the code readiness checkpoint sets it up in this run. Other tickets: not needed. |
