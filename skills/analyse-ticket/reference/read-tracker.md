@@ -26,10 +26,11 @@ no URL. Read each image or file in a browser.
 - For a PDF, Excel or Word file, open the attachment page and read the preview. If there is no
   preview, ask the user for the file.
 
-Open every attachment, including the small ones. A small image is often an email signature; the
-large ones carry the evidence. Skip only images you have read on an earlier page.
+Open the attachments you need to understand the ticket (`SKILL.md` Step 1). A small image is
+often an email signature; the large ones usually carry the evidence. Skip images you have read on
+an earlier page.
 
-## Record for each image
+## Note for yourself, for each image
 
 - The document numbers, values and statuses it shows.
 - The **date format** of that user (D/M/YYYY or M/D/YYYY). Find it from a date that is not

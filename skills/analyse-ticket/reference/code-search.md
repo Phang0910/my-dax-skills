@@ -18,8 +18,8 @@ installation:
 **Neither exists, or a readiness check fails** (a missing version folder, or no custom code for
 the project) → that piece is missing. Go to the code readiness checkpoint in `SKILL.md`.
 
-**Get the latest custom code** before you read it, and record the version in the Checks section
-of the output. Find the copy's type from the repo root of the custom code folder:
+**Get the latest custom code** before you read it, and put the version in **For the developer**
+in the output. Find the copy's type from the repo root of the custom code folder:
 
 | The folder has | Type | Pending changes? | Update | Version |
 |---|---|---|---|---|
@@ -34,7 +34,7 @@ of the output. Find the copy's type from the repo root of the custom code folder
 - No pending changes → update without asking. Pending changes (usually a developer workspace) →
   ask the user before you update.
 - The update fails (expired token, sign-in prompt, no network) → continue on the current code, and
-  write in the output: "Custom code not updated — using <commit or changeset> from <date>".
+  write under **For the developer**: "Custom code not updated — using <commit or changeset> from <date>".
   Tell the user to run `/my-dax-skills:setup-mydaxskills` when the cause is the sign-in or token.
 
 Both layouts are `<Package>\<Model>\Ax*\<Name>.xml` (for example `ApplicationSuite\Foundation\AxTable\PurchLine.xml`).
@@ -45,13 +45,18 @@ Inside a model, each element is one XML file: `AxClass\<Name>.xml`, `AxTable\<Na
 
 - **Customizations first.** In the project model, find the extensions on the path:
   `[ExtensionOf(classStr(X))]`, `[ExtensionOf(tableStr(X))]`, form extensions, event handlers.
-  For each one, write what it changes — or "no effect on the symptom".
+  For each one, note for yourself what it changes — or "no effect on the symptom". Only the ones
+  that affect the symptom go in the output.
 - **Then the standard code** that those extensions wrap, and the standard methods the symptom
   passes through. Read the exact method, not the whole file.
+- **Find an element by name** with `d365fo-dev aot search <substring>` when the `d365fo-dev` CLI
+  is installed. It matches a case-insensitive substring, not a wildcard: `aot search ChassisDMS`,
+  not `aot search *Chassis*`. Narrow it with `--type table,class` or `--model <Model>`. Run it with
+  the PowerShell tool; the d365fo-dev hook blocks it in Bash. Then `Read` the file it returns.
 - **Search exact files.** Give `Grep` and `Read` a full file path, or a folder plus a filename
   glob. A search over all of `PackagesLocalDirectory` times out.
-- Use the `Grep` and `Read` tools for metadata. Shell commands on metadata folders can be blocked
-  by a hook.
+- Use the `Read` tool for file content, and `Grep` only on exact files or a narrow glob. Shell
+  commands on metadata folders can be blocked by a hook.
 - If the `d365fo-dev` skill is available, use it for X++ lookups (references, overrides, labels).
 
 ## What to note
