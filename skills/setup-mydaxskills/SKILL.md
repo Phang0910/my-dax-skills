@@ -83,7 +83,8 @@ the map is inside it):
    - Git → `git --version` runs.
    - TFVC → `tf.exe` exists
      (`& "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -find "Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team Explorer\tf.exe"`),
-     or, without Visual Studio, a saved token at `%LOCALAPPDATA%\my-dax-skills\azdo-pat-<org>.xml`.
+     or, without Visual Studio, a saved token: any `%LOCALAPPDATA%\my-dax-skills\azdo-pat-*.xml`
+     (the file name holds the organisation).
 
 ### Checked by its own skill
 
@@ -141,42 +142,41 @@ Fix the chosen item only. When the user has a part to do, give it in short steps
 
 ### Token guide (TFVC without Visual Studio)
 
-Do not ask for the organisation name first. Send the whole guide at once, filled in for this
-project, and wait for "done".
-
-**Before you write it**, look for the project's organisation yourself: the project map, the
-project's `.sln` files on this PC (`https://dev.azure.com/<org>` inside them), or memory. Found →
-use it in the link and in the command. Not found → use the fallback link and the command without
-`-Collection`; the script asks for the browser address and reads the organisation from it.
-
-Write it like this (fill in every `<…>`; never leave a placeholder):
+**Never ask the user for the organisation name** — not in chat, not in a question box. You do not
+need it: the user picks the organisation on the page below, and the script reads it from the
+address they paste. Send the guide at once, exactly in this form, and wait for "done". Fill in
+only `<Project>`, `<ADO project>` and `<full script path>`.
 
 ```
 Set up <Project> custom code — about 3 minutes
 
-1. Open <Project>'s code in Azure DevOps and sign in with your <Project> account:
-   <https://dev.azure.com/<org>/<ADO project>/_versionControl>
-   (Not sure? Open https://aex.dev.azure.com/me, click <Project>'s organisation, then Repos.)
-2. Top right, click the User settings icon — a person with a small gear, left of your
+1. Open https://aex.dev.azure.com/me and sign in with the account you use for <Project>.
+2. Under Organizations, click <Project>'s organisation. Then open the <ADO project> project and
+   click Repos.
+3. Top right, click the User settings icon — a person with a small gear, left of your
    profile picture (not the picture itself). Click Personal access tokens.
-3. Click + New Token and fill in:
+4. Click + New Token and fill in:
    | Field        | Fill in                                                   |
    | Name         | Claude TFVC read                                          |
    | Organization | leave as shown                                            |
    | Expiration   | 90 days (or the longest it allows)                        |
    | Scopes       | Custom defined → Code → tick Read only. Nothing else.     |
-4. Click Create, then the copy icon next to the token. Keep this page open.
-5. Open PowerShell (Start → type PowerShell → Enter) and paste this line:
+5. Click Create, then the copy icon next to the token. Keep this page open.
+6. Open PowerShell (Start → type PowerShell → Enter) and paste this line:
 
-   powershell -ExecutionPolicy Bypass -File "<full script path>" -SavePat[ -Collection https://dev.azure.com/<org>]
+   powershell -ExecutionPolicy Bypass -File "<full script path>" -SavePat
 
-   [Without -Collection: when it asks for the address, go back to the browser, copy the
-   address bar, and paste it.]
-   When it asks for the token, paste it (it stays hidden) and press Enter.
-6. When it prints "OK - the token works", come back here and type done.
+   - It asks for the address: copy the browser's address bar (the Azure DevOps page from
+     step 2) and paste it.
+   - It asks for the token: paste it (it stays hidden) and press Enter.
+7. When it prints "OK - the token works", come back here and type done.
 ```
 
+- `<ADO project>`: the project map's TFVC column (for example `MMM` in `TFVC: MMM Trunk/Final`).
+  Not in the map → write "<Project>'s project".
 - `<full script path>` is the real path of `scripts\Get-TfvcLatest.ps1` in this skill's folder.
+- For the first download after "done", take `-Collection` from the token file the script saved:
+  `%LOCALAPPDATA%\my-dax-skills\azdo-pat-<org>.xml` (the newest one) gives `<org>`.
 - **Claude app with a Terminal panel** (`mcp__terminal__run_in_terminal` is available): you can
   open the command in a new Terminal tab for the user instead of step 5's "open PowerShell". The
   user still types the token into that tab. Never read that tab while the token prompt is open.
@@ -188,7 +188,7 @@ Set up <Project> custom code — about 3 minutes
 The token stays out of the conversation: the user pastes it only into the script's own prompt,
 the script stores it encrypted for that Windows user, and the script never prints it. When a user
 offers a token in chat, tell them not to. If they already pasted it, ask them to revoke it on the
-Personal access tokens page and create a new one, then send them to step 5.
+Personal access tokens page and create a new one, then send them to step 6.
 
 A connector change takes effect in a **new session**. A folder granted with `request_directory`
 works at once.
