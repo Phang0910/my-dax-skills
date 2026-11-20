@@ -136,9 +136,12 @@ path on your PC — it is in the plugin folder.
    ```
    powershell -ExecutionPolicy Bypass -File "<script path>" -SavePat
    ```
-   - At the address prompt, paste the browser's address bar from step 1. The script reads the
-     organisation from it. (Or add `-Collection https://dev.azure.com/<org>` to skip this prompt.)
-   - At the token prompt, paste the token (it stays hidden) and press Enter.
+   - At prompt **1/2 (TOKEN)**, paste the token (it stays hidden) and press Enter.
+   - At prompt **2/2 (ADDRESS BAR)**, copy the browser's address bar and paste it. The script
+     reads the organisation from it. (Or add `-Collection https://dev.azure.com/<org>` to skip
+     this prompt.)
+
+   Paste the token only at prompt 1/2. Anywhere else it shows on screen, and you must revoke it.
 
    The script tests the token, stores it encrypted for your Windows user, and never prints it.
    It ends with "OK - the token works", or says what to fix.

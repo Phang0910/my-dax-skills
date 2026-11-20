@@ -166,9 +166,10 @@ Set up <Project> custom code — about 3 minutes
 
    powershell -ExecutionPolicy Bypass -File "<full script path>" -SavePat
 
-   - It asks for the address: copy the browser's address bar (the Azure DevOps page from
-     step 2) and paste it.
-   - It asks for the token: paste it (it stays hidden) and press Enter.
+   - "1/2 Paste the TOKEN": paste the token you just copied (it stays hidden) and press Enter.
+   - "2/2 … ADDRESS BAR": go back to the browser, copy the address bar of the page you are on,
+     paste it and press Enter.
+   Paste the token only at prompt 1/2. Anywhere else it shows on screen.
 7. When it prints "OK - the token works", come back here and type done.
 ```
 

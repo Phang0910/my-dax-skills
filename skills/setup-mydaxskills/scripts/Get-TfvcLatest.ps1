@@ -50,6 +50,10 @@ function Get-OrgName([string]$url) {
 # Any Azure DevOps address (copied from the browser) -> the collection URL https://dev.azure.com/<org>.
 function ConvertTo-CollectionUrl([string]$address) {
     $a = $address.Trim().Trim('"')
+    if ($a -match '^[A-Za-z0-9]{40,}$') {
+        Clear-Host
+        throw "That looks like a TOKEN, not an address, and it was shown on screen. Revoke it now (User settings > Personal access tokens > Revoke), create a new one, and run the command again. Paste the token only at the hidden token prompt."
+    }
     if ($a -notmatch '^https?://') { $a = "https://$a" }
     $u = [Uri]$a
     if ($u.Host -like '*.visualstudio.com') { return "https://dev.azure.com/$($u.Host.Split('.')[0])" }
@@ -210,16 +214,17 @@ function Invoke-Incremental([int]$from, [int]$to, [hashtable]$headers) {
 
 if ($SavePat) {
     if ($Collection -match '[<>]') { $Collection = $null }
+    # Token first: right after Create it is on the clipboard, so the first prompt is the hidden one.
+    $secure = Read-Host "1/2  Paste the TOKEN (it stays hidden), then press Enter" -AsSecureString
+    if ($secure.Length -eq 0) { throw 'No token pasted. Run the command again.' }
     if (-not $Collection) {
-        $Collection = ConvertTo-CollectionUrl (Read-Host "Paste the address from the browser (the Azure DevOps page you have open)")
+        $Collection = ConvertTo-CollectionUrl (Read-Host "2/2  Now copy the browser's ADDRESS BAR (the Azure DevOps page) and paste it here")
     } else {
         $Collection = ConvertTo-CollectionUrl $Collection
     }
     $org = Get-OrgName $Collection
     Write-Host "Organisation: $org"
     New-Item -ItemType Directory -Path $PatDir -Force | Out-Null
-    $secure = Read-Host "Paste the token for $org (it stays hidden), then press Enter" -AsSecureString
-    if ($secure.Length -eq 0) { throw 'No token pasted. Run the command again.' }
     $secure | Export-Clixml (Get-PatFile $Collection)
 
     # Check the token with one read call that needs Code (Read) only.
