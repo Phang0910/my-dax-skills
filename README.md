@@ -42,7 +42,8 @@ is asking for.
 | everything | the **Tracker** connector | enable it in Claude settings → Connectors |
 | `update-weekly-report`, `kb-this` | the **DAXONET Notes** connector | same place |
 | `raise-ms-support-ticket` | **Claude in Chrome** (optional) | take the guide-pack path instead — it needs no browser at all |
-| `analyse-ticket` | **Claude in Chrome** or the built-in browser, for ticket images and SQL Execute; **DAXONET Notes** and **Microsoft Learn** for known answers; the standard and custom code folders ([code setup](skills/setup-mydaxskills/reference/code-setup.md)) | it falls back to the built-in browser on its own; without a browser it asks you to run the SQL and paste the images; without the code folders it pauses and asks: run `setup-mydaxskills` first (recommended), or continue without code, with every code check marked "not checked" |
+| `analyse-ticket` | **Claude in Chrome** or the built-in browser, for ticket images and SQL Execute; **DAXONET Notes** and **Microsoft Learn** for known answers; for code tickets, the standard and custom code folders ([code setup](skills/setup-mydaxskills/reference/code-setup.md)) | it falls back to the built-in browser on its own; without a browser it asks you to run the SQL and paste the images; setup and data tickets need no code; a code ticket without the code shows you the setup steps in the same run and carries on when you type done |
+| `implement-ticket` | **Claude Code** on a dev VM with the **d365fo CLI plugin** (`vs-d365fo-cli-claude-plugin`) and the project's custom code; **SQL JIT** access for dev testing | `setup-mydaxskills` installs the plugin; SQL JIT is asked for when needed, through `Invoke-DevSql.ps1` |
 | `update-es-weekly-sheet` | **Claude Code**, plus the SharePoint folder synced | it checks first and tells you to switch, and gives you one link + **Sync** for the folder; writes go through your desktop Excel |
 
 The two person-scoped skills — `update-weekly-report` and `update-es-weekly-sheet` — default to **you**, resolved from your Tracker account rather than a name baked into the skill. Pass
@@ -56,6 +57,7 @@ Only `update-es-weekly-sheet` is Claude Code-only — it edits the workbook on y
 |---|---|
 | `setup-mydaxskills` | Checks everything the plugin needs on this PC — connectors, browser, standard D365FO code, and optionally the projects' custom code you pick — then sets up what it can and guides you through the rest. Run it by name; it never starts on its own. |
 | `analyse-ticket` | Analyses a ticket to its root cause — reads every journal and image, checks known answers, the custom and standard code, and the real data through SQL Execute (UAT first), then proposes the fix, workaround or setup change. |
+| `implement-ticket` | Builds the fix for an analysed ticket in the project's code — checks the analysis handover, gets one approval for the plan (names and objects), creates everything through the d365fo CLI with DAXONET naming and a feature switch, checks the project is complete, tests in dev when deployed, and hands over. Never checks in. |
 | `draft-progress` | Drafts a short progress/completion note for a Tracker (Redmine) ticket in the house format, shows it with the ticket number for confirmation, then posts it to the ticket. |
 | `draft-email` | Drafts a reply email to a customer or vendor in the house style, then hands it back for you to review and send yourself. |
 | `draft-acknowledge-email` | Drafts the first-response acknowledgement email for a newly registered support case — confirms the Support Case ID and the assigned consultant, both read off Tracker. |
@@ -97,9 +99,9 @@ everything are in [`code-setup.md`](skills/setup-mydaxskills/reference/code-setu
 
 ### analyse-ticket
 
-**Before first use**, run `/my-dax-skills:setup-mydaxskills`. When a ticket's project has no custom code on
-this PC yet, the skill pauses and offers to run `/my-dax-skills:setup-mydaxskills` in the same
-conversation (it picks up the project from the ticket), or to continue without code.
+**Before first use**, run `/my-dax-skills:setup-mydaxskills`. The skill first sorts the ticket: setup
+and data tickets skip the code. When a code ticket's project has no custom code on this PC yet, it
+shows you the setup steps in the same run and carries on when you type done.
 
 Takes a ticket from "what is wrong" to a proven root cause and a proposed action, and stops there.
 Building the fix, the customer email and closing the ticket are the other skills.
@@ -122,8 +124,27 @@ is "reproduced" only when the symptom was produced on purpose in UAT, and "confi
 the opposite test also passed. Colleague conclusions in the journals start as hypotheses and are
 checked again.
 
-The output is ASD-STE100 style: a four-line summary first (problem, cause, action, next step),
-then the details and a handover block for the next skill.
+The output is written for a functional consultant: Problem / See it / Cause / Fix / Next step
+first, then Why it happens, a UAT test when the cause is not proven yet, the options, and a short
+For the developer block that `implement-ticket` builds from.
+
+### implement-ticket
+
+Builds the fix that `analyse-ticket` chose. It checks the handover against the current code
+first, then sends **one plan to approve**: the VS project, feature class, label file, and a table
+of every object it will create or modify. Names follow
+[`conventions.md`](skills/implement-ticket/reference/conventions.md); the prefix comes from the
+project map. Nothing is created before you approve.
+
+All AOT work goes through the d365fo CLI. A bundled check
+([`Test-ProjectCompleteness.ps1`](skills/implement-ticket/scripts/Test-ProjectCompleteness.ps1))
+confirms every element and label `.txt` is in the project, no folder is empty, and new files are
+pending adds. It builds and deploys only when you ask, and never checks in.
+
+After a dev deploy it tests with the feature on and off, through a saved SQL JIT connection
+([`Invoke-DevSql.ps1`](skills/setup-mydaxskills/scripts/Invoke-DevSql.ps1)): you save it once in
+your own PowerShell; one read-only SELECT per run, rolled back, 200-row cap, expires after 8
+hours. When dev cannot test the case, it tells you to check in and test in UAT.
 
 ### draft-progress
 

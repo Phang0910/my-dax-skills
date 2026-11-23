@@ -86,6 +86,18 @@ the map is inside it):
      or, without Visual Studio, a saved token: any `%LOCALAPPDATA%\my-dax-skills\azdo-pat-*.xml`
      (the file name holds the organisation).
 
+### Development tools for `implement-ticket` (Claude Code on a dev VM only)
+
+Optional: only developers need this row. ⏸ when the PC has no local D365 installation
+(`%LOCALAPPDATA%\Microsoft\Dynamics365\<version>\PackagesLocalDirectory\`).
+
+- **d365fo CLI plugin**: `claude plugin list` shows `vs-d365fo-cli-claude-plugin` (or the older
+  `d365fo-dev-cli`), **and** `d365fo-dev --version` runs in PowerShell. Plugin present but the
+  command fails → ❌ **restart needed**.
+
+SQL JIT access for dev testing is not part of setup: `implement-ticket` asks for it when it needs
+it, and it expires after a few hours.
+
 ### Checked by its own skill
 
 `update-es-weekly-sheet` checks Claude Code and the SharePoint folder sync itself when it runs.
@@ -135,6 +147,7 @@ Fix the chosen item only. When the user has a part to do, give it in short steps
 | Claude in Chrome | Give the link. | Install https://chromewebstore.google.com/detail/claude/fcoeoabgfenejglbffodgkkbkcdhcgfn, **Add to Chrome**, open the Claude icon, sign in. |
 | Standard code | Find the zip (default `%USERPROFILE%\Downloads\D365Std.zip`). Extract it with `tar -xf "<zip>" -C C:\` as a background task, then run the file-count check in [`reference/code-setup.md`](reference/code-setup.md) section 1. | Download `D365Std.zip` from the team's shared "D365 Standard Source" folder (link from the team lead) if it is not in Downloads, and say where it is. |
 | Folder not added to Claude | **No added folders yet:** request access with `mcp__ccd_directory__request_directory` and the folder path. **The session already has added folders** (an environment): ask the user to add it there, so it stays for later sessions. **Claude Code CLI:** ask for `/add-dir`. | Approve the access request, or add the folder: **Edit environment > Folders > Add**, or type `/add-dir <folder>` in the CLI. |
+| d365fo CLI plugin missing | Install it: `claude plugin marketplace add daxonet/claude-plugin-marketplace` (skip if `claude plugin marketplace list` shows `daxonet-plugin-marketplace`), then `claude plugin install vs-d365fo-cli-claude-plugin@daxonet-plugin-marketplace`. A failure about access → the user needs GitHub access to the private `daxonet` repos. | Ask the team lead for access to the `daxonet` GitHub organisation if the install is refused. Restart the Claude app after the install. |
 | Git missing | Install it: `winget install --id Git.Git -e --silent --accept-package-agreements --accept-source-agreements`. Open a new shell (or refresh `PATH`) and run `git --version`. | — |
 | Git project's custom code | Clone it: `git clone "<repo URL>" C:\Custom\<Project>`. Then add the folder (row above). | Sign in with the project's Azure DevOps account when the Git Credential Manager window opens. |
 | TFVC project, Visual Studio installed | Tell the user what to do (right column), then check the folder. | In Visual Studio: **Source Control Explorer** > the project's `<server path>` > **Get Latest Version**. Say which local folder it maps to. |

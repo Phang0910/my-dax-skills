@@ -13,7 +13,7 @@
     (DPAPI) under %LOCALAPPDATA%\my-dax-skills\. The script never prints it.
 
 .EXAMPLE
-    # Once per organisation — run it yourself in a terminal; it asks for the PAT:
+    # Once per organisation - run it yourself in a terminal; it asks for the PAT:
     .\Get-TfvcLatest.ps1 -Collection https://dev.azure.com/contoso -SavePat
 
     # First download, and every later get latest:
@@ -43,7 +43,7 @@ $PatDir = Join-Path $env:LOCALAPPDATA 'my-dax-skills'
 function Get-OrgName([string]$url) {
     $u = [Uri]$url.Trim().TrimEnd('/')
     if ($u.Host -like '*.visualstudio.com') { return $u.Host.Split('.')[0] }
-    # https://dev.azure.com/<org>/<project>/... — the organisation is the first path segment.
+    # https://dev.azure.com/<org>/<project>/... - the organisation is the first path segment.
     return $u.Segments[1].Trim('/')
 }
 
